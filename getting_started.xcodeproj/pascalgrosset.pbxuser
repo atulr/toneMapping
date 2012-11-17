@@ -1,0 +1,285 @@
+// !$*UTF8*$!
+{
+	6E8F6663106849690080879D /* main.cpp:195 */ = {
+		isa = PBXFileBreakpoint;
+		actions = (
+		);
+		breakpointStyle = 0;
+		continueAfterActions = 0;
+		countType = 0;
+		delayBeforeContinue = 0;
+		fileReference = 6EC6272B10671AE40003710F /* main.cpp */;
+		hitCount = 0;
+		ignoreCount = 0;
+		lineNumber = 195;
+		modificationTime = 275350524.088331;
+		originalNumberOfMultipleMatches = 0;
+		state = 2;
+	};
+	6EC627061067192F0003710F /* Project object */ = {
+		activeBuildConfigurationName = Debug;
+		activeExecutable = 6EC6271A106719940003710F /* cg */;
+		activeTarget = 6EC62717106719940003710F /* cg */;
+		addToTargets = (
+			6EC62717106719940003710F /* cg */,
+		);
+		breakpoints = (
+			6E8F6663106849690080879D /* main.cpp:195 */,
+		);
+		codeSenseManager = 6EC6270B1067192F0003710F /* Code sense */;
+		executables = (
+			6EC6271A106719940003710F /* cg */,
+		);
+		ignoreBreakpointsInProjectsDict = {
+		};
+		perUserDictionary = {
+			"PBXConfiguration.PBXBreakpointsDataSource.v1:1CA1AED706398EBD00589147" = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXBreakpointsDataSource_BreakpointID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					20,
+					198,
+					20,
+					99,
+					99,
+					29,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXBreakpointsDataSource_ActionID,
+					PBXBreakpointsDataSource_TypeID,
+					PBXBreakpointsDataSource_BreakpointID,
+					PBXBreakpointsDataSource_UseID,
+					PBXBreakpointsDataSource_LocationID,
+					PBXBreakpointsDataSource_ConditionID,
+					PBXBreakpointsDataSource_IgnoreCountID,
+					PBXBreakpointsDataSource_ContinueID,
+				);
+			};
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					243,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					203,
+					60,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 300663154;
+			PBXWorkspaceStateSaveDate = 300663154;
+		};
+		perUserProjectItems = {
+			6EF8F97D11EBC3E7007102AE /* PBXTextBookmark */ = 6EF8F97D11EBC3E7007102AE /* PBXTextBookmark */;
+			6EF8F97F11EBC3E7007102AE /* PBXTextBookmark */ = 6EF8F97F11EBC3E7007102AE /* PBXTextBookmark */;
+			6EF8F98111EBC3E7007102AE /* PBXTextBookmark */ = 6EF8F98111EBC3E7007102AE /* PBXTextBookmark */;
+			6EF8F98311EBC3E7007102AE /* PBXTextBookmark */ = 6EF8F98311EBC3E7007102AE /* PBXTextBookmark */;
+		};
+		sourceControlManager = 6EC6270A1067192F0003710F /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	6EC6270A1067192F0003710F /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
+		};
+	};
+	6EC6270B1067192F0003710F /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	6EC62717106719940003710F /* cg */ = {
+		activeExec = 0;
+		executables = (
+			6EC6271A106719940003710F /* cg */,
+		);
+	};
+	6EC6271A106719940003710F /* cg */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = cg;
+		savedGlobals = {
+		};
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	6EC6272B10671AE40003710F /* main.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {991, 12224}}";
+			sepNavSelRange = "{9647, 0}";
+			sepNavVisRange = "{9330, 1063}";
+			sepNavWindowFrame = "{{198, 74}, {1050, 704}}";
+		};
+	};
+	6EC6272C10671AE40003710F /* main.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {991, 1888}}";
+			sepNavSelRange = "{1508, 8}";
+			sepNavVisRange = "{1934, 1104}";
+			sepNavWindowFrame = "{{230, 67}, {1050, 704}}";
+		};
+	};
+	6EC6272D10671AE40003710F /* texture.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {991, 5536}}";
+			sepNavSelRange = "{1165, 0}";
+			sepNavVisRange = "{798, 1599}";
+			sepNavWindowFrame = "{{17, 71}, {1050, 704}}";
+		};
+	};
+	6EC6272E10671AE40003710F /* texture.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {891, 784}}";
+			sepNavSelRange = "{1286, 0}";
+			sepNavVisRange = "{557, 913}";
+			sepNavWindowFrame = "{{15, 215}, {950, 558}}";
+		};
+	};
+	6EC6275710671AE40003710F /* vector.cpp */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {991, 576}}";
+			sepNavSelRange = "{603, 0}";
+			sepNavVisRange = "{0, 605}";
+			sepNavWindowFrame = "{{15, 69}, {1050, 704}}";
+		};
+	};
+	6EC6275810671AE40003710F /* vector.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {991, 576}}";
+			sepNavSelRange = "{177, 7}";
+			sepNavVisRange = "{0, 184}";
+			sepNavWindowFrame = "{{15, 69}, {1050, 704}}";
+		};
+	};
+	6EF8F97D11EBC3E7007102AE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 6EF8F97E11EBC3E7007102AE /* main.cpp */;
+		name = "main.cpp: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 242;
+		vrLoc = 0;
+	};
+	6EF8F97E11EBC3E7007102AE /* main.cpp */ = {
+		isa = PBXFileReference;
+		name = main.cpp;
+		path = "/Users/pascalgrosset/Utah/2009 Fall/cs6610 - Interactive Computer Graphics/programs/OpenGL Sample/main.cpp";
+		sourceTree = "<absolute>";
+	};
+	6EF8F97F11EBC3E7007102AE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 6EF8F98011EBC3E7007102AE /* util.cpp */;
+		name = "util.cpp: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 309;
+		vrLoc = 0;
+	};
+	6EF8F98011EBC3E7007102AE /* util.cpp */ = {
+		isa = PBXFileReference;
+		name = util.cpp;
+		path = "/Users/pascalgrosset/Utah/2009 Fall/cs6610 - Interactive Computer Graphics/programs/OpenGL Sample/util.cpp";
+		sourceTree = "<absolute>";
+	};
+	6EF8F98111EBC3E7007102AE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 6EF8F98211EBC3E7007102AE /* util.h */;
+		name = "util.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 231;
+		vrLoc = 0;
+	};
+	6EF8F98211EBC3E7007102AE /* util.h */ = {
+		isa = PBXFileReference;
+		lastKnownFileType = sourcecode.c.h;
+		name = util.h;
+		path = "/Users/pascalgrosset/Utah/2009 Fall/cs6610 - Interactive Computer Graphics/programs/OpenGL Sample/util.h";
+		sourceTree = "<absolute>";
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {803, 378}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 231}";
+		};
+	};
+	6EF8F98311EBC3E7007102AE /* PBXTextBookmark */ = {
+		isa = PBXTextBookmark;
+		fRef = 6EF8F98411EBC3E7007102AE /* util.h */;
+		name = "util.h: 1";
+		rLen = 0;
+		rLoc = 0;
+		rType = 0;
+		vrLen = 231;
+		vrLoc = 0;
+	};
+	6EF8F98411EBC3E7007102AE /* util.h */ = {
+		isa = PBXFileReference;
+		name = util.h;
+		path = "/Users/pascalgrosset/Utah/2009 Fall/cs6610 - Interactive Computer Graphics/programs/OpenGL Sample/util.h";
+		sourceTree = "<absolute>";
+	};
+}

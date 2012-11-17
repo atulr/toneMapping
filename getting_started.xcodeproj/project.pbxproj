@@ -1,0 +1,265 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6E2D32F41616B28C0066453F /* texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6EC6272D10671AE40003710F /* texture.cpp */; };
+		6E2D32F51616B2A70066453F /* textures in Resources */ = {isa = PBXBuildFile; fileRef = 6EC6272F10671AE40003710F /* textures */; };
+		6E2D3337161A10030066453F /* sampleGUI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6E2D3335161A10030066453F /* sampleGUI.cpp */; };
+		6EC62720106719BB0003710F /* GLUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EC6271F106719BB0003710F /* GLUI.framework */; };
+		6EC6272410671A7D0003710F /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EC6272310671A7D0003710F /* OpenGL.framework */; };
+		6EC6272810671A890003710F /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6EC6272710671A890003710F /* GLUT.framework */; };
+		EE0B1B4E1655A918007BF769 /* HDRLook_Arcades_HDR.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = EE0B1B4A1655A918007BF769 /* HDRLook_Arcades_HDR.jpeg */; };
+		EE0B1B4F1655A918007BF769 /* image.png in Resources */ = {isa = PBXBuildFile; fileRef = EE0B1B4B1655A918007BF769 /* image.png */; };
+		EE0B1B501655A918007BF769 /* StLouisArch.rgb in Resources */ = {isa = PBXBuildFile; fileRef = EE0B1B4C1655A918007BF769 /* StLouisArch.rgb */; };
+		EE0B1B511655A918007BF769 /* StLouisArchMultExpEV+4.09.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = EE0B1B4D1655A918007BF769 /* StLouisArchMultExpEV+4.09.jpeg */; };
+		EE0B1B571655AD67007BF769 /* globalOperator.frag in Sources */ = {isa = PBXBuildFile; fileRef = EE0B1B561655AD67007BF769 /* globalOperator.frag */; };
+		EE0B1B591655AD74007BF769 /* globalOperator.vert in Sources */ = {isa = PBXBuildFile; fileRef = EE0B1B581655AD74007BF769 /* globalOperator.vert */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		6E2D32DA161666E20066453F /* Color.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Color.h; sourceTree = "<group>"; };
+		6E2D3335161A10030066453F /* sampleGUI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = sampleGUI.cpp; sourceTree = "<group>"; };
+		6E2D3336161A10030066453F /* sampleGUI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sampleGUI.h; sourceTree = "<group>"; };
+		6EC62718106719940003710F /* cg.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = cg.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6EC6271B106719940003710F /* cg-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "cg-Info.plist"; sourceTree = "<group>"; };
+		6EC6271F106719BB0003710F /* GLUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUI.framework; path = /Library/Frameworks/GLUI.framework; sourceTree = "<absolute>"; };
+		6EC6272310671A7D0003710F /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = /System/Library/Frameworks/OpenGL.framework; sourceTree = "<absolute>"; };
+		6EC6272710671A890003710F /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = /System/Library/Frameworks/GLUT.framework; sourceTree = "<absolute>"; };
+		6EC6272D10671AE40003710F /* texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = texture.cpp; sourceTree = "<group>"; };
+		6EC6272E10671AE40003710F /* texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = texture.h; sourceTree = "<group>"; };
+		6EC6272F10671AE40003710F /* textures */ = {isa = PBXFileReference; lastKnownFileType = folder; path = textures; sourceTree = "<group>"; };
+		EE0B1B4A1655A918007BF769 /* HDRLook_Arcades_HDR.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = HDRLook_Arcades_HDR.jpeg; sourceTree = "<group>"; };
+		EE0B1B4B1655A918007BF769 /* image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = image.png; sourceTree = "<group>"; };
+		EE0B1B4C1655A918007BF769 /* StLouisArch.rgb */ = {isa = PBXFileReference; lastKnownFileType = file; path = StLouisArch.rgb; sourceTree = "<group>"; };
+		EE0B1B4D1655A918007BF769 /* StLouisArchMultExpEV+4.09.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "StLouisArchMultExpEV+4.09.jpeg"; sourceTree = "<group>"; };
+		EE0B1B561655AD67007BF769 /* globalOperator.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = globalOperator.frag; sourceTree = "<group>"; };
+		EE0B1B581655AD74007BF769 /* globalOperator.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = globalOperator.vert; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		6EC62716106719940003710F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6EC62720106719BB0003710F /* GLUI.framework in Frameworks */,
+				6EC6272410671A7D0003710F /* OpenGL.framework in Frameworks */,
+				6EC6272810671A890003710F /* GLUT.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		6EC627041067192F0003710F = {
+			isa = PBXGroup;
+			children = (
+				EE0B1B581655AD74007BF769 /* globalOperator.vert */,
+				EE0B1B561655AD67007BF769 /* globalOperator.frag */,
+				EE0B1B491655A918007BF769 /* images */,
+				6E2D3335161A10030066453F /* sampleGUI.cpp */,
+				6E2D3336161A10030066453F /* sampleGUI.h */,
+				6E2D32DA161666E20066453F /* Color.h */,
+				6EC6272D10671AE40003710F /* texture.cpp */,
+				6EC6272E10671AE40003710F /* texture.h */,
+				6EC6272F10671AE40003710F /* textures */,
+				6EC6272710671A890003710F /* GLUT.framework */,
+				6EC6272310671A7D0003710F /* OpenGL.framework */,
+				6EC6271F106719BB0003710F /* GLUI.framework */,
+				6EC62719106719940003710F /* Products */,
+				6EC6271B106719940003710F /* cg-Info.plist */,
+			);
+			sourceTree = "<group>";
+		};
+		6EC62719106719940003710F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6EC62718106719940003710F /* cg.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EE0B1B491655A918007BF769 /* images */ = {
+			isa = PBXGroup;
+			children = (
+				EE0B1B4A1655A918007BF769 /* HDRLook_Arcades_HDR.jpeg */,
+				EE0B1B4B1655A918007BF769 /* image.png */,
+				EE0B1B4C1655A918007BF769 /* StLouisArch.rgb */,
+				EE0B1B4D1655A918007BF769 /* StLouisArchMultExpEV+4.09.jpeg */,
+			);
+			path = images;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6EC62717106719940003710F /* cg */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6EC6271E106719950003710F /* Build configuration list for PBXNativeTarget "cg" */;
+			buildPhases = (
+				6EC62714106719940003710F /* Resources */,
+				6EC62715106719940003710F /* Sources */,
+				6EC62716106719940003710F /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = cg;
+			productName = cg;
+			productReference = 6EC62718106719940003710F /* cg.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		6EC627061067192F0003710F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0450;
+			};
+			buildConfigurationList = 6EC627091067192F0003710F /* Build configuration list for PBXProject "getting_started" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 6EC627041067192F0003710F;
+			productRefGroup = 6EC62719106719940003710F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6EC62717106719940003710F /* cg */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		6EC62714106719940003710F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E2D32F51616B2A70066453F /* textures in Resources */,
+				EE0B1B4E1655A918007BF769 /* HDRLook_Arcades_HDR.jpeg in Resources */,
+				EE0B1B4F1655A918007BF769 /* image.png in Resources */,
+				EE0B1B501655A918007BF769 /* StLouisArch.rgb in Resources */,
+				EE0B1B511655A918007BF769 /* StLouisArchMultExpEV+4.09.jpeg in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		6EC62715106719940003710F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6E2D32F41616B28C0066453F /* texture.cpp in Sources */,
+				6E2D3337161A10030066453F /* sampleGUI.cpp in Sources */,
+				EE0B1B571655AD67007BF769 /* globalOperator.frag in Sources */,
+				EE0B1B591655AD74007BF769 /* globalOperator.vert in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		6EC627071067192F0003710F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+			};
+			name = Debug;
+		};
+		6EC627081067192F0003710F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+			};
+			name = Release;
+		};
+		6EC6271C106719950003710F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Volumes/SDL_image/**",
+				);
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "cg-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PRODUCT_NAME = cg;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		6EC6271D106719950003710F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"/Volumes/SDL_image/**",
+				);
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "";
+				INFOPLIST_FILE = "cg-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PRODUCT_NAME = cg;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		6EC627091067192F0003710F /* Build configuration list for PBXProject "getting_started" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6EC627071067192F0003710F /* Debug */,
+				6EC627081067192F0003710F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		6EC6271E106719950003710F /* Build configuration list for PBXNativeTarget "cg" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6EC6271C106719950003710F /* Debug */,
+				6EC6271D106719950003710F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 6EC627061067192F0003710F /* Project object */;
+}
