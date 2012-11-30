@@ -19,28 +19,9 @@ void myGlutDisplay(	void )
     
     glLoadIdentity(); // reset the modelview matrix to the default state
     gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);    // place the camera where we want
-    GLint loc;    
-    
-    char file[100];
-    strcpy(file, "/Users/atulrungta/Desktop/toneMapping/globalOperator");
-    bindShaders(file);
-    loc = glGetUniformLocation(prog , "sampler0");
-
-    glEnable(GL_TEXTURE_2D);
-    glActiveTexture(GL_TEXTURE0);
-    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    
-    
-    glUniform1iARB(loc, 0);
-    glBindTexture(GL_TEXTURE_2D, textures[0]);
-    // draws the scene
-    drawScene();
-    glDisable(GL_TEXTURE_2D);
-
-    glUseProgram(0);
-
-    
-    
+    glUseProgramObjectARB(logAverageProgram);
+        drawScene();
+    glUseProgramObjectARB(0);
     glFlush();
 	glutSwapBuffers();
 
@@ -375,37 +356,74 @@ char* readFile(const char* filename) {
     
 }
 
-void bindShaders(char fileName[]) {
-    char *vs = NULL,*fs = NULL,*fs2 = NULL;
+void bindShaders(GLhandleARB & glsl_program, GLhandleARB & vertexShader, GLhandleARB & fragmentShader, char fileName[]) {
+	const GLcharARB* vertex_shader_source;
+	const GLcharARB* fragment_shader_source;
+	GLint status;
     char fName[100];
     strcpy(fName, fileName);
-	vert = glCreateShader(GL_VERTEX_SHADER);
-	frag = glCreateShader(GL_FRAGMENT_SHADER);
-    vs = readFile(strcat(fileName, ".vert"));
-    fs = readFile(strcat(fName,".frag"));
-    
-    const char * vv = vs;
-    const char * ff = fs;
-    
-    glShaderSource(vert, 1, &vv,NULL);
-    glShaderSource(frag, 1, &ff,NULL);
-	
-    free(vs);free(fs);
-	
-    glCompileShader(vert);
-    glCompileShader(frag);
-	
-    prog = glCreateProgram();
-    
-    glAttachShader(prog,vert);
-    glAttachShader(prog,frag);
-    
-    
-    glLinkProgram(prog);
-    glUseProgram(prog);;
 
-    
-    
+	// Create the OpenGL shader objects
+	glsl_program    = glCreateProgramObjectARB();
+	vertexShader   = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
+	fragmentShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
+	
+	// Load the source code
+	vertex_shader_source = readFile(strcat(fileName, ".vert"));
+	fragment_shader_source = readFile(strcat(fName, ".frag"));
+	
+	glShaderSourceARB(vertexShader, 1, &vertex_shader_source, NULL);
+//    printf("%s", 
+	glShaderSourceARB(fragmentShader, 1, &fragment_shader_source, NULL);
+	
+	delete vertex_shader_source;
+	delete fragment_shader_source;
+	
+	
+	// Compile the shaders
+	glCompileShaderARB(vertexShader);
+	glGetObjectParameterivARB(vertexShader, GL_OBJECT_COMPILE_STATUS_ARB, &status);
+	if( GL_FALSE == status ) {
+		// Get the InfoLog and print the compilation error
+		GLint msglen;
+		glGetObjectParameterivARB(vertexShader, GL_OBJECT_INFO_LOG_LENGTH_ARB, &msglen);
+		GLcharARB* msg = (GLcharARB*)malloc(msglen);
+		glGetInfoLogARB(vertexShader, msglen, NULL, msg);
+        std::cout << "Error compiling vertex shader : " << msg << std::endl;
+		free(msg);
+		exit(EXIT_FAILURE);
+	}
+	
+	glCompileShaderARB(fragmentShader);
+	glGetObjectParameterivARB(fragmentShader, GL_OBJECT_COMPILE_STATUS_ARB, &status);
+	if( GL_FALSE == status ) {
+		// Get the InfoLog and print the compilation error
+		GLint msglen;
+		glGetObjectParameterivARB(fragmentShader, GL_OBJECT_INFO_LOG_LENGTH_ARB, &msglen);
+		GLcharARB* msg = (GLcharARB*)malloc(msglen);
+		glGetInfoLogARB(fragmentShader, msglen, NULL, msg);
+        std::cout << "Error compiling fragment shader : " << msg << std::endl;
+		free(msg);
+		exit(EXIT_FAILURE);
+	}
+	
+	// Attach the compiled shader to the program object
+	glAttachObjectARB(glsl_program, vertexShader);
+	glAttachObjectARB(glsl_program, fragmentShader);
+	
+	// Link the program
+	glLinkProgramARB(glsl_program);
+	glGetObjectParameterivARB(glsl_program, GL_OBJECT_LINK_STATUS_ARB, &status);
+	if( GL_FALSE == status ) {
+		// Get the InfoLog and print the linking error
+		GLint msglen;
+		glGetObjectParameterivARB(glsl_program, GL_OBJECT_INFO_LOG_LENGTH_ARB, &msglen);
+		GLcharARB* msg = (GLcharARB*)malloc(msglen);
+		glGetInfoLogARB(glsl_program, 1024, NULL, msg);
+        std::cout << "Error linking GLSL program : " << msg << std::endl;
+		free(msg);
+		exit(EXIT_FAILURE);
+	}
     
 }
 
@@ -577,8 +595,9 @@ int main(int argc,	char* argv[])
     
     // init the interface
 	initGLUI();
-
-    
+    char file[100];
+    strcpy(file, "/Users/atulrungta/Desktop/toneMapping/globalOperator");
+    bindShaders(logAverageProgram, vertexShader, fragmentShader, file);
 	// initialize the camera
 	eye[0] = 0; 	eye[1] = 4;     eye[2] = 10;
 	lookat[0] = 0;	lookat[1] = 0;	lookat[2] = 0;

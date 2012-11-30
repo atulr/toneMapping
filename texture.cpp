@@ -35,6 +35,8 @@ void LoadGLTextures() {
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image[0]);
 //    glBindTexture(GL_TEXTURE_2D,0);
+    printf("%d width\n", width);
+    printf("%d height\n", height);
     
 //	image[1] = read_texture(textureNames[1].c_str(), &width, &height, &components);
 //	glBindTexture(GL_TEXTURE_2D, textures[1]);

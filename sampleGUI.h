@@ -85,7 +85,9 @@ int live_draw_floor;
 int live_draw_object;
 int live_use_depth_buffer;
 int live_texture_capture;
-
+GLhandleARB logAverageProgram;
+GLhandleARB vertexShader;
+GLhandleARB fragmentShader;
 
 //////////////////////////////////////////////////////////////////////////
 // Functions
@@ -96,7 +98,7 @@ void drawScene();           // draws the scene
 
 int setUpFrameBufferObj();  // sets up a FBO
 void captureSceneToTexture();
-void bindShaders(char fileName[]);
+void bindShaders(GLhandleARB & glsl_program, GLhandleARB & vertexShader, GLhandleARB & fragmentShader, char fileName[]);
 char* readFile(const char* filename);
 // opengl callbacks that need to the registered
 void myGlutDisplay(	void );                 // drawing the scene goes here
