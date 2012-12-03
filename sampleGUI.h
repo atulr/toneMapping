@@ -10,6 +10,8 @@
 #include <iostream>
 #include <string>
 #include <jpeglib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 
 
@@ -37,6 +39,7 @@ float lookat[3];
 // more textures
 GLuint fboId;
 GLuint textureCapture;
+GLuint inOutTexture[2];
 int texSizeX = 512;
 int texSizeY = 512;
 int texCapture = 0;
@@ -113,10 +116,13 @@ void myGlutReshape(int	x, int y);                      // the window has changed
 // UI
 void initGLUI();                // init the UI code
 void glui_cb(int control);      // some controls generate a callback when they are changed
+void calculateLogAverageLuminance();
+void resetTexture(GLuint texName, int textureWidth, int textureHeight, int color_red, int color_green, int color_blue, int color_alpha);
+float logAverage(float *img);
+void scaleImageToMidTone(float *img);
+void copyLuminance();
 
-
-
-
+float maxVal(float *img);
 //////////////////////////////////////////////////////////////////////////
 // Inline defined functions
 
@@ -215,7 +221,6 @@ inline GLenum checkGLError(std::string message ="", bool warmNoError = false){
     return err;
 }
 
-
 //-----------------------------------------------------------------------------
 // Name: writeTextureToPPM
 // Desc: writes a ppm image
@@ -226,8 +231,8 @@ inline void writeTextureToPPM( const char* fileName , GLuint tex, GLuint m_iSize
 {
     //cout << "m_iSizeX: " <<m_iSizeX << "  m_iSizeY: " << m_iSizeY << endl;
     GLuint m_iSizePerElement = sizeof(GL_UNSIGNED_BYTE);
-    
     unsigned char*content = new unsigned char[m_iSizeX * m_iSizeY * m_iSizePerElement];
+//    printf("%d x", m_iSizeX); 
     glBindTexture(GL_TEXTURE_2D, tex);
     glGetTexImage(GL_TEXTURE_2D, 0, m_format, m_type, content);
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -248,6 +253,7 @@ inline void writeTextureToPPM( const char* fileName , GLuint tex, GLuint m_iSize
             img.set(x, y, C);
         }
     }
+
     img.write(std::string(fileName) + ".ppm");
     
     delete [] content;

@@ -19,6 +19,8 @@
 		EE0B1B511655A918007BF769 /* StLouisArchMultExpEV+4.09.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = EE0B1B4D1655A918007BF769 /* StLouisArchMultExpEV+4.09.jpeg */; };
 		EE0B1B571655AD67007BF769 /* globalOperator.frag in Sources */ = {isa = PBXBuildFile; fileRef = EE0B1B561655AD67007BF769 /* globalOperator.frag */; };
 		EE0B1B591655AD74007BF769 /* globalOperator.vert in Sources */ = {isa = PBXBuildFile; fileRef = EE0B1B581655AD74007BF769 /* globalOperator.vert */; };
+		EE6A359F166C3B4900406E7A /* hdrloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE6A359E166C3B4900406E7A /* hdrloader.cpp */; };
+		EE6A35A6166C7E4900406E7A /* rgbe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EE6A35A5166C7E4900406E7A /* rgbe.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +41,10 @@
 		EE0B1B4D1655A918007BF769 /* StLouisArchMultExpEV+4.09.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "StLouisArchMultExpEV+4.09.jpeg"; sourceTree = "<group>"; };
 		EE0B1B561655AD67007BF769 /* globalOperator.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = globalOperator.frag; sourceTree = "<group>"; };
 		EE0B1B581655AD74007BF769 /* globalOperator.vert */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = globalOperator.vert; sourceTree = "<group>"; };
+		EE6A359E166C3B4900406E7A /* hdrloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hdrloader.cpp; sourceTree = "<group>"; };
+		EE6A35A1166C3B5300406E7A /* hdrloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hdrloader.h; sourceTree = "<group>"; };
+		EE6A35A4166C7DA300406E7A /* rgbe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rgbe.h; sourceTree = "<group>"; };
+		EE6A35A5166C7E4900406E7A /* rgbe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = rgbe.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +64,10 @@
 		6EC627041067192F0003710F = {
 			isa = PBXGroup;
 			children = (
+				EE6A35A5166C7E4900406E7A /* rgbe.cpp */,
+				EE6A35A4166C7DA300406E7A /* rgbe.h */,
+				EE6A35A1166C3B5300406E7A /* hdrloader.h */,
+				EE6A359E166C3B4900406E7A /* hdrloader.cpp */,
 				EE0B1B581655AD74007BF769 /* globalOperator.vert */,
 				EE0B1B561655AD67007BF769 /* globalOperator.frag */,
 				EE0B1B491655A918007BF769 /* images */,
@@ -163,6 +173,8 @@
 				6E2D3337161A10030066453F /* sampleGUI.cpp in Sources */,
 				EE0B1B571655AD67007BF769 /* globalOperator.frag in Sources */,
 				EE0B1B591655AD74007BF769 /* globalOperator.vert in Sources */,
+				EE6A359F166C3B4900406E7A /* hdrloader.cpp in Sources */,
+				EE6A35A6166C7E4900406E7A /* rgbe.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

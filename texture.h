@@ -12,8 +12,10 @@ extern GLuint textures[2];
 
 // load the textures
 void LoadGLTextures();
-
-
+unsigned* getImage();
+int getWidth();
+int getHeight();
+int getComponents();
 /*
  * read_texture() - read in an image file in SGI 'libimage' format
  * 	currently its very simple minded and converts all images
@@ -28,6 +30,6 @@ void LoadGLTextures();
  *		RGBA -> RGB A
  *
  */
-unsigned *  read_texture(const char *name, int *width, int *height, int *components);
+unsigned*  read_texture(const char *name, int *width, int *height, int *components);
 
 #endif

@@ -5,38 +5,44 @@
 
 #include "texture.h"
 
-std::string textureNames[2] = { "textures/StLouisArch.rgb",  "textures/lightmap.rgb" };
+std::string textureNames[2] = { "textures/StLouisArch512.rgb",  "textures/lightmap.rgb" };
 
 GLuint textures[2];
+static unsigned *image = new unsigned ;
+static int width, height, components;
 
 void LoadGLTextures() {
-    static unsigned *image[2];
-    static int width, height, components;
+    
+//    static unsigned *image[2];
+//    static int width, height, components;
+
     
     // allocate space for texture
-	for (int i=0; i<2; i++)
-		image[i] = new unsigned;
+//	for (int i=0; i<2; i++)
+//		image[i] = new unsigned;
     
-    glEnable(GL_TEXTURE_2D);
+//    glEnable(GL_TEXTURE_2D);
     
     // Create Texture
-	glGenTextures(1, textures);
+//	glGenTextures(1, textures);
     
-	image[0] = read_texture(textureNames[0].c_str(), &width, &height, &components);
-	glBindTexture(GL_TEXTURE_2D, textures[0]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	image = read_texture(textureNames[0].c_str(), &width, &height, &components);
+//    printf("%d \n", width);
+//    printf("%d \n", height);
+//	glBindTexture(GL_TEXTURE_2D, textures[0]);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 //    glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image[0]);
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image[0]);
 //    glBindTexture(GL_TEXTURE_2D,0);
-    printf("%d width\n", width);
-    printf("%d height\n", height);
+//    printf("%d width\n", width);
+//    printf("%d height\n", height);
     
 //	image[1] = read_texture(textureNames[1].c_str(), &width, &height, &components);
 //	glBindTexture(GL_TEXTURE_2D, textures[1]);
@@ -46,15 +52,28 @@ void LoadGLTextures() {
 //	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 //	glTexImage2D(GL_TEXTURE_2D, 0, components, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image[1]);
 	
-    glDisable(GL_TEXTURE_2D);
+//    glDisable(GL_TEXTURE_2D);
     
     // free that part
-	for (int i=0; i<2; i++)
-		free (image[i]);
+//	for (int i=0; i<2; i++)
+//		free (image[i]);
 }
 
+unsigned* getImage() {
+    return image;
+}
 
+int getHeight(){
+    return height;
+}
 
+int getWidth() {
+    return width;
+}
+
+int getComponents() {
+    return components;
+}
 //--- Anything below is the read routine of SGI's "RGB" image format --
 
 void
@@ -256,7 +275,7 @@ ImageGetRow(ImageRec *image, unsigned char *buf, int y, int z) {
 
 unsigned *
 read_texture(const char *name, int *width, int *height, int *components) {
-    unsigned *base, *lptr;
+    unsigned char *base, *lptr;
     unsigned char *rbuf, *gbuf, *bbuf, *abuf;
     ImageRec *image;
     int y;
@@ -268,7 +287,7 @@ read_texture(const char *name, int *width, int *height, int *components) {
     (*width)=image->xsize;
     (*height)=image->ysize;
     (*components)=image->zsize;
-    base = (unsigned *)malloc(image->xsize*image->ysize*sizeof(unsigned));
+    base = (unsigned char*)malloc(image->xsize*image->ysize*sizeof(unsigned));
     rbuf = (unsigned char *)malloc(image->xsize*sizeof(unsigned char));
     gbuf = (unsigned char *)malloc(image->xsize*sizeof(unsigned char));
     bbuf = (unsigned char *)malloc(image->xsize*sizeof(unsigned char));

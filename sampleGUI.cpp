@@ -1,37 +1,311 @@
 #include "sampleGUI.h"
-
-
+#include "hdrloader.h"
+#include "rgbe.h"
 /////////////////////////////////////////////////////////////////
 //// Main opengl stuff
 
 GLuint vert,frag,prog;
+GLenum attachmentpoints[] = { GL_COLOR_ATTACHMENT0_EXT,
+    GL_COLOR_ATTACHMENT1_EXT
+};
+GLuint lumText;
+struct Yxy{
+    float r, g, b;
+}yxy;
 
+int CurrActiveBuffer = 0;
+int readTex = CurrActiveBuffer;
+int writeTex = 1-CurrActiveBuffer;
+int flag = 0;
+int width = 767, height= 1023, width1, height1, components;
+float luminance[1023][767];
+float luminanceImage[1023][767][3];
 
+float *hdrImage;
+unsigned *imageTex;
+HDRLoaderResult result;
+rgbe_header_info info;
+int a;
 // where the drawing stuff should go
+static float RGB2XYZ  [3][3] = {{0.5141364, 0.3238786,  0.16036376},
+    {0.265068,  0.67023428, 0.06409157},
+    {0.0241188, 0.1228178,  0.84442666}};
+
+float logAverage(float *img) {
+    float sum; 
+    double lum;
+    for (int i=0; i<width*height; i++)
+        sum += log(.00001 + img[i]);
+    lum = exp(sum/(float) (width * height));
+    printf("lum %f\n", lum);
+    return lum;
+}
+
+float get_maxvalue ()
+{
+    float max = 0.;
+    
+    for (int i = 0; i < width * height; i++)
+        max = (max < hdrImage[i]) ? hdrImage[i] : max;
+    return max;
+}
+
+void copyLuminance() {
+    int x, y;
+    float img[width*height];
+    
+    for (x = 0; x < height; x++)
+        for (y = 0; y < width; y++) {
+            
+            luminance[y][x] = luminanceImage[x][y][0];
+            img[width * x + y] = luminanceImage[x][y][0];
+        }
+    scaleImageToMidTone(img);
+//    glEnable(GL_TEXTURE_2D);
+//
+//    GLuint lumText;
+//    glGenTextures(1, &lumText);
+//    glBindTexture(GL_TEXTURE_2D, lumText);
+//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+////    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+////    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    
+//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+//    glBindTexture(GL_TEXTURE_2D,0);
+//   
+//    glDisable(GL_TEXTURE_2D);
+//    writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved1", lumText, width, height, GL_RGBA, GL_UNSIGNED_BYTE);
+
+
+}
+
+void scaleImageToMidTone(float *img) {
+    float alpha = 0.18f;
+    float scaleFactor;
+    scaleFactor = 1.0 / logAverage(img);
+    hdrImage[0] *= scaleFactor * alpha;
+    for(int i=0;i<width; i++)
+        for(int j=0;j<height;j++) {
+            int startAddressOfPixel = ((i*width) + j);
+            int addr = ((i*width) + j+3);
+            hdrImage[addr] *= scaleFactor * alpha;
+            img[startAddressOfPixel] *= scaleFactor * alpha; 
+        }
+    
+//    FILE *f;
+//    f = fopen("/Users/atulrungta/Desktop/cathedralMapped.hdr","wb");
+//    RGBE_WriteHeader(f,width,height,&info);
+//    RGBE_WritePixels(f,hdrImage,width*height);
+//    fclose(f);
+//    glEnable(GL_TEXTURE_2D);
+//       
+//        glGenTextures(1, &lumText);
+//        glBindTexture(GL_TEXTURE_2D, lumText);
+//        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+////        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+////        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+//
+//    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//        
+//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 512, 512, 0, GL_RGB, GL_UNSIGNED_BYTE, getImage());
+//        glEnable( GL_TEXTURE_2D );
+//        glBindTexture(GL_TEXTURE_2D,lumText);
+//        drawScene();
+//        glDisable(GL_TEXTURE_2D);
+    
+//        writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved1", lumText, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+    
+}
+
+
+//since log average luminance is not working with shaders.. trying to calculate without shaders in a function..
+void calculateLogAverageLuminance() {
+
+//    unsigned char *image = new unsigned char;
+    
+//    int width, height, components;
+//    width = result.width;
+//    height = result.height;
+    
+    //    for (int i = 0; i < 2; i++) {
+//    glGenTextures(2, inOutTexture);
+
+//    width = getWidth();
+//    height = getHeight();
+//    image = (unsigned char *) malloc(width * height * 4);
+//    image = getImage();
+//    components = getComponents();
+    float red, blue, green, alpha;
+    float rgb[3], XYZ[3];
+    
+    float W;
+ 
+// x is the width, y is the height;
+    
+    for (int i=0; i< height; i++){
+        for(int j = 0 ; j<width; j++) {
+            int startAddressOfPixel = ((i*width) + j);
+            red = hdrImage[startAddressOfPixel];
+            blue = hdrImage[startAddressOfPixel+1];
+            green = hdrImage[startAddressOfPixel+2];
+//            printf("red %f\n", red);
+//            printf("blue %f\n", blue);
+//            printf("green %f\n", green);
+
+            rgb[0] = (float)red;
+            rgb[1] = (float)blue;
+            rgb[2] = (float)green;
+
+            XYZ[0] = RGB2XYZ[0][0] * red + RGB2XYZ[0][1] * green + RGB2XYZ[0][2] * blue;
+            XYZ[1] = RGB2XYZ[1][0] * red + RGB2XYZ[1][1] * green + RGB2XYZ[1][2] * blue;
+            XYZ[2] = RGB2XYZ[2][0] * red + RGB2XYZ[2][1] * green + RGB2XYZ[2][2] * blue;
+            
+//            for (int a = 0; a < 3; a++)
+//                for (int b = 0; b < 3; b++)
+            if ((W = XYZ[0] + XYZ[1] + XYZ[2]) > 0.0)
+            {
+                luminanceImage[i][j][0] = XYZ[1];         /* Y */
+                luminanceImage[i][j][1] = XYZ[0] / W;     /* x */
+                luminanceImage[i][j][2] = XYZ[1] / W;     /* y */
+//                printf("li %f \n", luminanceImage[j][i][0]);
+//                printf("strt %d \n", startAddressOfPixel);
+            }
+            else
+                luminanceImage[i][j][0] = luminanceImage[i][j][1] = luminanceImage[i][j][2] = 0.;
+        }
+    }
+    
+//    
+//    
+}
 
 void myGlutDisplay(	void )
 {
-    if (texCapture == 1)
-        captureSceneToTexture();
-    
-    
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
     
     glLoadIdentity(); // reset the modelview matrix to the default state
     gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);    // place the camera where we want
-    glUseProgramObjectARB(logAverageProgram);
-        drawScene();
-    glUseProgramObjectARB(0);
-    glFlush();
-	glutSwapBuffers();
 
+//    drawScene();
+//    if(flag == 0) {
+//    if (texCapture == 1)
+//        captureSceneToTexture();
+//    
+////    ////    writeTextureToPPM("/Users/atulrungta/Desktop/textureSavedgreen", inOutTexture[1], 2048, 2048, GL_RGBA, GL_UNSIGNED_BYTE);
+//    
+//    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
+//    
+//    glLoadIdentity(); // reset the modelview matrix to the default state
+//    gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);    // place the camera where we want
+//    GLint reducedTextures, texelSize; 
+//    texSizeX = 512;
+//    texSizeY = 512;
+//    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId);
+//    glUseProgramObjectARB(logAverageProgram);
+//
+//    reducedTextures = glGetUniformLocationARB( logAverageProgram, "sampler0");
+//
+//    for(int i = 0;i < 4; i++) {
+//        
+//        setUpFrameBufferObj();
+//        texelSize = glGetUniformLocationARB( logAverageProgram, "TexelSize");
+//        
+////        printf("%d", reducedTextures);
+//        glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
+//        glUniform1i(reducedTextures, 0);
+//        glActiveTexture(GL_TEXTURE0);
+////        
+//        glBindTexture( GL_TEXTURE_2D, inOutTexture[readTex] );
+//        glBegin(GL_QUADS);
+//            glNormal3f(0.0, 0.0, -1.0);
+//            glTexCoord2f(0.0,0.0); glVertex3f(-10,  0, 0);
+//            glTexCoord2f(0.0,1.0); glVertex3f(-10, 10, 0);
+//            glTexCoord2f(1.0,1.0); glVertex3f( 10, 10, 0);
+//            glTexCoord2f(1.0,0.0); glVertex3f( 10,  0, 0);
+//        glEnd();
+////        glViewport(0, 0, texSizeX, texSizeY);
+////        gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);    // place the camera where we want
+//
+//        flag = 1;
+//        printf("flag %d", flag);
+//
+//        writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved", inOutTexture[readTex], texSizeX, texSizeY, GL_RGBA, GL_UNSIGNED_BYTE);
+//
+//
+//        texSizeX /= 2;
+//        texSizeY /= 2;
+//        
+//        //ping-pong
+//        writeTex = 1 - writeTex;
+//        readTex = 1 - readTex;
+//
+//        glUniform2f(texelSize, texSizeX, texSizeY);
+//    }
+//    
+//
+//     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);  
+//    glDisable(GL_TEXTURE_2D);
+//    glUseProgramObjectARB(0);
+    glEnable(GL_TEXTURE_2D);
+    
+    glGenTextures(1, &lumText);
+    glBindTexture(GL_TEXTURE_2D, lumText);
+    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, width, height, 0, GL_RGB, GL_FLOAT, hdrImage);
+    glEnable( GL_TEXTURE_2D );
+//    glBindTexture(GL_TEXTURE_2D,lumText);
+    drawScene();
+//    glDisable(GL_TEXTURE_2D);
+
+        glFlush();
+	glutSwapBuffers();
+//    }
 }
 
-
+void resetTexture(GLuint texName, int textureWidth, int textureHeight, int color_red, int color_green, int color_blue, int color_alpha){
+    // cout << "resetTexture" << endl;
+    unsigned char *textureArray;
+    textureArray = new unsigned char[4*textureWidth*textureHeight];
+    for (int i=0; i<(textureWidth*textureHeight); i++){
+        textureArray[i*4 +0] = color_red;
+        textureArray[i*4 +1] = color_green;
+        textureArray[i*4 +2] = color_blue;
+        textureArray[i*4 +3] = color_alpha;
+    }
+    
+    
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, texName);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, textureWidth, textureHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, textureArray);
+    
+    delete[] textureArray;
+    textureArray = NULL;
+}
 // drawing elements of the scene
 void drawScene(){
     glPushAttrib(GL_ALL_ATTRIB_BITS);
     glDisable(GL_COLOR_MATERIAL);
+    glEnable(GL_TEXTURE_2D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+    glBindTexture(GL_TEXTURE_2D, lumText);
+    glBegin(GL_QUADS);
+
+
     glBegin(GL_QUADS);
     glNormal3f(0.0, 0.0, -1.0);
     glTexCoord2f(0.0,0.0); glVertex3f(-10,  0, 0);
@@ -40,38 +314,11 @@ void drawScene(){
     glTexCoord2f(1.0,0.0); glVertex3f( 10,  0, 0);
     glEnd();
     
+    glDisable(GL_TEXTURE_2D);
     glEnable(GL_COLOR_MATERIAL);
     
     glPopAttrib();
 
-}
-
-void captureSceneToTexture(){
-    glViewport(0,0, texSizeX,texSizeY);   // set viewport to texture size
-    
-    
-    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-    checkGLFrameBufferError(GL_FRAMEBUFFER, "After FBO binding");
-        
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
-        
-    glLoadIdentity(); // reset the modelview matrix to the default state
-    gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);    // place the camera where we want
-        
-    // draws the scene
-    drawScene();
-        
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    checkGLFrameBufferError(GL_FRAMEBUFFER, "After releasing buffer");
-        
-    //should be used only for debugging; writing texture to disk is slow!!!!!!!!!!
-    //put in a path you want your texture to be in
-    writeTextureToPPM("/Users/pascalgrosset/Desktop/textureSaved", textureCapture, texSizeX, texSizeX, GL_RGBA, GL_UNSIGNED_BYTE);
-    
-    
-    texCapture = 0;     // toggle screen capture off
-        
-    myGlutReshape(0,0); // force reset of the viewport
 }
 
 
@@ -87,8 +334,8 @@ void initGL(){
     LoadGLTextures();
     
     // sets up a frame buffer object
-    if (setUpFrameBufferObj() == 1 )
-        std::cout << "Framebuffer creation failed!!!" << std::endl << std::endl;
+//    if (setUpFrameBufferObj() == 1 )
+//        std::cout << "Framebuffer creation failed!!!" << std::endl << std::endl;
 
     // color to clear the screen to
     glClearColor(0, 0, 0, 0);
@@ -99,46 +346,93 @@ void initGL(){
 }
 
    
+void captureSceneToTexture(){
+//    glClearColor(1.0, 0, 0, 1);
+//    glViewport(0,0, texSizeX,texSizeY);   // set viewport to texture size
+    
+    
+//    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+    checkGLFrameBufferError(GL_FRAMEBUFFER, "After FBO binding");
+    
+//    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
+    
+//    glLoadIdentity(); // reset the modelview matrix to the default state
+//    gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);    // place the camera where we want
+    
+    // draws the scene
+//    drawScene();
+    
+//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    checkGLFrameBufferError(GL_FRAMEBUFFER, "After releasing buffer");
+    
+    //should be used only for debugging; writing texture to disk is slow!!!!!!!!!!
+    //put in a path you want your texture to be in
+    writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved", inOutTexture[readTex], texSizeX, texSizeY, GL_RGBA, GL_UNSIGNED_BYTE);
+    
+    
+    texCapture = 0;     // toggle screen capture off
+    
+    myGlutReshape(0,0); // force reset of the viewport
+}
 
 // settiug up a frambeuffer object for capture to texture
 // directly taken from: http://www.songho.ca/opengl/gl_fbo.html
 int setUpFrameBufferObj(){
     // create the texture to capture the texture to
-    glGenTextures(1, &textureCapture);
-    glBindTexture(GL_TEXTURE_2D, textureCapture);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, texSizeX, texSizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glGenTextures(2, inOutTexture);
+    unsigned* image = new unsigned;
+    int width, height, components;
+//    for (int i = 0; i < 2; i++) {
+    glEnable(GL_TEXTURE_2D);
+        image = getImage();
+        width = getWidth();
+        height = getHeight();
+        components = getComponents();
+        glBindTexture(GL_TEXTURE_2D, inOutTexture[0]);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+       
     
-    
+        glBindTexture(GL_TEXTURE_2D, inOutTexture[1]);
+        
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+//    }
+//    resetTexture(inOutTexture[1], 512, 512, 0, 255, 0, 255);
     // create a renderbuffer object to store depth info
-    GLuint rboId;
-    glGenRenderbuffers(1, &rboId);
-    glBindRenderbuffer(GL_RENDERBUFFER, rboId);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, texSizeX, texSizeY);
-    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    
-    // create a framebuffer object
-    glGenFramebuffers(1, &fboId);
-    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-    
-    // attach the texture to FBO color attachment point
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureCapture, 0);
-    
-    // attach the renderbuffer to depth attachment point
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
-    
-    // check FBO status
-    GLenum status = checkGLFrameBufferError(GL_FRAMEBUFFER, "After creating buffer");
-    if (status != GL_FRAMEBUFFER_COMPLETE)
-        return 1;
-    
-    // switch back to window-system-provided framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    
+//    GLuint rboId;
+//    glGenRenderbuffers(1, &rboId);
+//    glBindRenderbuffer(GL_RENDERBUFFER, rboId);
+//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, texSizeX, texSizeY);
+//    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+//    
+//    // create a framebuffer object
+//    glGenFramebuffers(1, &fboId);
+//    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+//    
+//    // attach the texture to FBO color attachment point
+//    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, inOutTexture[readTex], 0);
+//    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, inOutTexture[writeTex], 0);
+//    
+//    // attach the renderbuffer to depth attachment point
+//    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+//    
+//    // check FBO status
+//    GLenum status = checkGLFrameBufferError(GL_FRAMEBUFFER, "After creating buffer");
+//    if (status != GL_FRAMEBUFFER_COMPLETE)
+//        return 1;
+//    
+//    // switch back to window-system-provided framebuffer
+//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//    
     return 0;
 }
 
@@ -302,19 +596,19 @@ void myGlutKeyboard(unsigned char key, int x, int y)
 void myGlutReshape(int	x, int y)
 {
 	int tx, ty, tw, th;
-	GLUI_Master.get_viewport_area(&tx, &ty, &tw, &th);
-	glViewport(tx, ty, tw, th);
-    
-    
-    // projection transform
+//	GLUI_Master.get_viewport_area(&tx, &ty, &tw, &th);
+//	glViewport(tx, ty, tw, th);
+//    glViewport(0, 0, 2048, 2048);    
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glFrustum(-1, 1, -1, 1, 1, 1000);
-//    gluOrtho2D(-1, -1, -1, 1);
     
 	// camera transform
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+    
+    
+	glutPostRedisplay();
     
 
 	glutPostRedisplay();
@@ -483,8 +777,8 @@ void initGLUI(){
     //
 	// create the interface subwindow and add widgets
 	//
-	glui = GLUI_Master.create_glui_subwindow(main_window, GLUI_SUBWINDOW_LEFT);
-    
+//	glui = GLUI_Master.create_glui_subwindow(main_window, GLUI_SUBWINDOW_LEFT);
+    glui = GLUI_Master.create_glui("GLUI");
 	// initialize live variables
 	live_object_type = 0;
 	live_object_xz_trans[0] = 0;
@@ -572,7 +866,7 @@ int main(int argc,	char* argv[])
 	// create the glut window
 	//
 	glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH);
-	glutInitWindowSize(1000, 600);
+	glutInitWindowSize(512, 512);
 	glutInitWindowPosition(100,100);
     
     
@@ -588,21 +882,33 @@ int main(int argc,	char* argv[])
 	GLUI_Master.set_glutKeyboardFunc(myGlutKeyboard);
 	GLUI_Master.set_glutMouseFunc(myGlutMouse);
 	glutMotionFunc(myGlutMotion);
-
-    
+     
     // initialize gl
     initGL();
     
     // init the interface
 	initGLUI();
+    FILE *f;
+//    bool ret = HDRLoader::load("/Users/atulrungta/Desktop/toneMapping/images/image3.hdr", result); 
+    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/cathedral.hdr","rb");
+    RGBE_ReadHeader(f,&width,&height,&info);
+    hdrImage = (float *)malloc(sizeof(float)*3*width*height);
+    RGBE_ReadPixels_RLE(f,hdrImage,width,height);
+    fclose(f);
     char file[100];
     strcpy(file, "/Users/atulrungta/Desktop/toneMapping/globalOperator");
-    bindShaders(logAverageProgram, vertexShader, fragmentShader, file);
+    
+//    bindShaders(logAverageProgram, vertexShader, fragmentShader, file);
+//    setUpFrameBufferObj();
+
 	// initialize the camera
 	eye[0] = 0; 	eye[1] = 4;     eye[2] = 10;
 	lookat[0] = 0;	lookat[1] = 0;	lookat[2] = 0;
-
-    
+    calculateLogAverageLuminance();
+    copyLuminance();
+//    std::string textureNames[2] = { "textures/StLouisArch512.rgb",  "textures/lightmap.rgb" };
+//    imageTex = read_texture(textureNames[0].c_str(), &width1, &height1, &components);
+                   
 	
 	// give control over to glut
 	glutMainLoop();
