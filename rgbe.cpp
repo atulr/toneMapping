@@ -198,10 +198,6 @@ int RGBE_WritePixels(FILE *fp, float *data, int numpixels)
   unsigned char rgbe[4];
 
   while (numpixels-- > 0) {
-//      printf("num %d\n", numpixels);
-//      printf("red %f \n", data[RGBE_DATA_RED]);
-//      printf("green %f \n", data[RGBE_DATA_GREEN]);
-//      printf("blue %f \n", data[RGBE_DATA_BLUE]);
 
     float2rgbe(rgbe,data[RGBE_DATA_RED],
 	       data[RGBE_DATA_GREEN],data[RGBE_DATA_BLUE]);
@@ -333,6 +329,7 @@ int RGBE_WritePixels_RLE(FILE *fp, float *data, int scanline_width,
 int RGBE_ReadPixels_RLE(FILE *fp, float *data, int scanline_width,
 			int num_scanlines)
 {
+
   unsigned char rgbe[4], *scanline_buffer, *ptr, *ptr_end;
   int i, count;
   unsigned char buf[2];
@@ -407,6 +404,7 @@ int RGBE_ReadPixels_RLE(FILE *fp, float *data, int scanline_width,
       rgbe[1] = scanline_buffer[i+scanline_width];
       rgbe[2] = scanline_buffer[i+2*scanline_width];
       rgbe[3] = scanline_buffer[i+3*scanline_width];
+
       rgbe2float(&data[RGBE_DATA_RED],&data[RGBE_DATA_GREEN],
 		 &data[RGBE_DATA_BLUE],rgbe);
       data += RGBE_DATA_SIZE;

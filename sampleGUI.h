@@ -121,8 +121,11 @@ void resetTexture(GLuint texName, int textureWidth, int textureHeight, int color
 float logAverage(float *img);
 void scaleImageToMidTone(float *img);
 void copyLuminance();
-
+void simpleOperator(float *img);
 float maxVal(float *img);
+void YxyToRGB();
+void clamp_image();
+
 //////////////////////////////////////////////////////////////////////////
 // Inline defined functions
 

@@ -21,11 +21,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "rgbe.cpp"
-         timestampString = "376264050.665185"
+         timestampString = "376387139.866845"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "223"
-         endingLineNumber = "223"
+         startingLineNumber = "219"
+         endingLineNumber = "219"
          landmarkName = "RGBE_ReadPixels(FILE *fp, float *data, int numpixels)"
          landmarkType = "7">
       </FileBreakpoint>
@@ -35,11 +35,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "sampleGUI.cpp"
-         timestampString = "376268336.153175"
+         timestampString = "376439273.139806"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "895"
-         endingLineNumber = "895"
+         startingLineNumber = "887"
+         endingLineNumber = "887"
          landmarkName = "main(int argc, char* argv[])"
          landmarkType = "7">
       </FileBreakpoint>
@@ -49,11 +49,37 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "rgbe.cpp"
-         timestampString = "376264050.665185"
+         timestampString = "376387139.866845"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "340"
-         endingLineNumber = "340"
+         startingLineNumber = "337"
+         endingLineNumber = "337"
+         landmarkName = "RGBE_ReadPixels_RLE(FILE *fp, float *data, int scanline_width, int num_scanlines)"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "sampleGUI.cpp"
+         timestampString = "376439273.139806"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "183"
+         endingLineNumber = "183">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "rgbe.cpp"
+         timestampString = "376387139.866845"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "349"
+         endingLineNumber = "349"
          landmarkName = "RGBE_ReadPixels_RLE(FILE *fp, float *data, int scanline_width, int num_scanlines)"
          landmarkType = "7">
       </FileBreakpoint>

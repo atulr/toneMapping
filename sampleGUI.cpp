@@ -18,26 +18,33 @@ int readTex = CurrActiveBuffer;
 int writeTex = 1-CurrActiveBuffer;
 int flag = 0;
 int width = 767, height= 1023, width1, height1, components;
-float luminance[1023][767];
-float luminanceImage[1023][767][3];
-
-float *hdrImage;
+float *luminance;
+float *luminanceImage;
+float gammaval = 1.6;
+float *hdrImage, *hdrImageCopy;
 unsigned *imageTex;
 HDRLoaderResult result;
 rgbe_header_info info;
-int a;
+float lW, lD;
 // where the drawing stuff should go
 static float RGB2XYZ  [3][3] = {{0.5141364, 0.3238786,  0.16036376},
     {0.265068,  0.67023428, 0.06409157},
     {0.0241188, 0.1228178,  0.84442666}};
+static float XYZ2RGB  [3][3] = {{ 2.5651,   -1.1665,   -0.3986},
+    {-1.0217,    1.9777,    0.0439},
+    { 0.0753,   -0.2543,    1.1892}};
+
 
 float logAverage(float *img) {
-    float sum; 
-    double lum;
-    for (int i=0; i<width*height; i++)
-        sum += log(.00001 + img[i]);
+    float sum = 0.f;; 
+    double lum = 0.f;
+    for (int i=0; i<width*height; i++) {
+        sum += log(.00001 + luminance[i]);
+    }
     lum = exp(sum/(float) (width * height));
-    printf("lum %f\n", lum);
+    printf("sum %f", sum);
+    lW = lum;
+    printf("avg lum %f", lum);
     return lum;
 }
 
@@ -45,7 +52,7 @@ float get_maxvalue ()
 {
     float max = 0.;
     
-    for (int i = 0; i < width * height; i++)
+    for (int i = 0; i < width * height * 3; i++)
         max = (max < hdrImage[i]) ? hdrImage[i] : max;
     return max;
 }
@@ -53,224 +60,210 @@ float get_maxvalue ()
 void copyLuminance() {
     int x, y;
     float img[width*height];
-    
-    for (x = 0; x < height; x++)
-        for (y = 0; y < width; y++) {
-            
-            luminance[y][x] = luminanceImage[x][y][0];
-            img[width * x + y] = luminanceImage[x][y][0];
-        }
-    scaleImageToMidTone(img);
-//    glEnable(GL_TEXTURE_2D);
+    img[0] = hdrImage[0];
+    int c = 0;
+//    for (x = 0; x < height * width; x++) {  
+//            luminance[x] = hdrImage[c];
+//        c+=3;
+//        }
+    scaleImageToMidTone(luminance);
+    simpleOperator(luminance);
+
+}
+
+void simpleOperator(float *img) {
+    float Ld, lMax;
+    int j;
+    int c = 0;
+
+    lMax = get_maxvalue();
+    printf("L %f \n", lW);
+    for(int i = 0; i< width * height; i++) {
+        Ld = luminance[i]/(1.0 + luminance[i]);
+        hdrImage[c] = powf((hdrImage[c]/lW), 0.2) * Ld;
+        hdrImage[c+1] = powf((hdrImage[c+1]/lW), 0.2) * Ld;
+        hdrImage[c+2] = powf((hdrImage[c+2]/lW), 0.2) * Ld;
+        c+=3;
+        
+    }
+    //    for(int i = 0; i < width * height; i++) {
+//        hdrImage[c] = hdrImage[c] * (1. + (hdrImage[c] / lMax)) / (1. + hdrImage[c]);
+//        c+=3;
 //
-//    GLuint lumText;
-//    glGenTextures(1, &lumText);
-//    glBindTexture(GL_TEXTURE_2D, lumText);
-//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-////    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-////    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//    
-//    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
-//    glBindTexture(GL_TEXTURE_2D,0);
-//   
-//    glDisable(GL_TEXTURE_2D);
-//    writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved1", lumText, width, height, GL_RGBA, GL_UNSIGNED_BYTE);
+//    }
+    clamp_image();
+        
+//        FILE *f;
+//        f = fopen("/Users/atulrungta/Desktop/memorialSimpleOperator.hdr","wb");
+//        RGBE_WriteHeader(f,width,height,&info);
+//        RGBE_WritePixels(f,hdrImage,width*height);
+//        fclose(f);    
 
+        
+}
 
+void clamp_image ()
+{
+    int x, y, c= 0;
+    
+    for (y = 0; y < width*height; y++) {
+            hdrImage[c] = (hdrImage[c] > 1.) ? 1. : hdrImage[c];
+            hdrImage[c + 1] = (hdrImage[c + 1] > 1.) ? 1. : hdrImage[c + 1];
+            hdrImage[c + 2] = (hdrImage[c + 2] > 1.) ? 1. : hdrImage[c + 2];
+            c+=3;
+    }
+
+    FILE *f;
+    f = fopen("/Users/atulrungta/Desktop/cathedralToneMapped.hdr","wb");
+    
+    RGBE_WriteHeader(f,width,height,&info);
+    RGBE_WritePixels(f,hdrImage,width*height);
+    fclose(f);    
+
+}
+
+void YxyToRGB() {
+    int       x, y, i, j, c=0;
+    float    result[3];
+    float    X, Y, Z;
+    
+    for (x = 0; x < width*height; x++){
+
+            Y         = hdrImage[c];        /* Y */
+            result[1] = hdrImage[c + 1];        /* x */
+            result[2] = hdrImage[c + 2];        /* y */
+            if ((Y > 0.) && (result[1] > 0.) && (result[2] > 0.))
+            {
+                X = (result[1] * Y) / result[2];
+                Z = (X/result[1]) - X - Y;
+            }
+            else
+                X = Z = 0.;
+            hdrImage[c] = X;
+            hdrImage[c + 1] = Y;
+            hdrImage[c+ 2] = Z;
+            result[0] = result[1] = result[2] = 0.;
+                   result[0] = XYZ2RGB[0][0] * hdrImage[c] + RGB2XYZ[0][1] * hdrImage[c + 1] + RGB2XYZ[0][2] * hdrImage[c + 2];
+                   result[1] = XYZ2RGB[1][0] * hdrImage[c] + RGB2XYZ[1][1] * hdrImage[c + 1] + RGB2XYZ[1][2] * hdrImage[c + 2];
+                   result[2] = XYZ2RGB[2][0] * hdrImage[c] + RGB2XYZ[2][1] * hdrImage[c + 1] + RGB2XYZ[2][2] * hdrImage[c + 2];
+         for (i = 0; i < 3; i++)
+                hdrImage[c + i] = result[i];
+        c += 3;
+        }
+    
+    clamp_image();
+
+    
 }
 
 void scaleImageToMidTone(float *img) {
     float alpha = 0.18f;
     float scaleFactor;
-    scaleFactor = 1.0 / logAverage(img);
-    hdrImage[0] *= scaleFactor * alpha;
-    for(int i=0;i<width; i++)
-        for(int j=0;j<height;j++) {
-            int startAddressOfPixel = ((i*width) + j);
-            int addr = ((i*width) + j+3);
-            hdrImage[addr] *= scaleFactor * alpha;
-            img[startAddressOfPixel] *= scaleFactor * alpha; 
+    scaleFactor = 1.0 / logAverage(luminance);
+    int c = 0;
+    for(int i=0;i<height; i++)
+        for(int j=0;j<width;j++) {
+            int startAddressOfPixel = (i*width + j);
+//            hdrImage[c] *= scaleFactor * alpha;
+            luminance[startAddressOfPixel] *= scaleFactor * alpha; 
+            c+=3;
         }
     
-//    FILE *f;
-//    f = fopen("/Users/atulrungta/Desktop/cathedralMapped.hdr","wb");
-//    RGBE_WriteHeader(f,width,height,&info);
-//    RGBE_WritePixels(f,hdrImage,width*height);
-//    fclose(f);
-//    glEnable(GL_TEXTURE_2D);
-//       
-//        glGenTextures(1, &lumText);
-//        glBindTexture(GL_TEXTURE_2D, lumText);
-//        glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-////        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-////        glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-//
-//    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//        
-//        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 512, 512, 0, GL_RGB, GL_UNSIGNED_BYTE, getImage());
-//        glEnable( GL_TEXTURE_2D );
-//        glBindTexture(GL_TEXTURE_2D,lumText);
-//        drawScene();
-//        glDisable(GL_TEXTURE_2D);
     
-//        writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved1", lumText, width, height, GL_RGB, GL_UNSIGNED_BYTE);
     
+    FILE *f;
+    f = fopen("/Users/atulrungta/Desktop/memorialMidTone.hdr","wb");
+    RGBE_WriteHeader(f,width,height,&info);
+    RGBE_WritePixels(f,hdrImage,width*height);
+    fclose(f);    
 }
 
 
 //since log average luminance is not working with shaders.. trying to calculate without shaders in a function..
 void calculateLogAverageLuminance() {
 
-//    unsigned char *image = new unsigned char;
-    
-//    int width, height, components;
-//    width = result.width;
-//    height = result.height;
-    
-    //    for (int i = 0; i < 2; i++) {
-//    glGenTextures(2, inOutTexture);
-
-//    width = getWidth();
-//    height = getHeight();
-//    image = (unsigned char *) malloc(width * height * 4);
-//    image = getImage();
-//    components = getComponents();
     float red, blue, green, alpha;
-    float rgb[3], XYZ[3];
-    
+    float rgb[3], XYZ[3],rgb1[3];
+    int c= 0;
     float W;
- 
 // x is the width, y is the height;
-    
+
     for (int i=0; i< height; i++){
         for(int j = 0 ; j<width; j++) {
-            int startAddressOfPixel = ((i*width) + j);
-            red = hdrImage[startAddressOfPixel];
-            blue = hdrImage[startAddressOfPixel+1];
-            green = hdrImage[startAddressOfPixel+2];
-//            printf("red %f\n", red);
-//            printf("blue %f\n", blue);
-//            printf("green %f\n", green);
-
-            rgb[0] = (float)red;
-            rgb[1] = (float)blue;
-            rgb[2] = (float)green;
-
-            XYZ[0] = RGB2XYZ[0][0] * red + RGB2XYZ[0][1] * green + RGB2XYZ[0][2] * blue;
-            XYZ[1] = RGB2XYZ[1][0] * red + RGB2XYZ[1][1] * green + RGB2XYZ[1][2] * blue;
-            XYZ[2] = RGB2XYZ[2][0] * red + RGB2XYZ[2][1] * green + RGB2XYZ[2][2] * blue;
+            int startAddressOfPixel = c;
+            rgb[0] = hdrImage[startAddressOfPixel];
+            rgb[1] = hdrImage[startAddressOfPixel+1];
+            rgb[2] = hdrImage[startAddressOfPixel+2];
+            luminance[i*width + j] = .27 * rgb[0] + .67 * rgb[1] + 0.06 * rgb[2];
             
-//            for (int a = 0; a < 3; a++)
-//                for (int b = 0; b < 3; b++)
-            if ((W = XYZ[0] + XYZ[1] + XYZ[2]) > 0.0)
-            {
-                luminanceImage[i][j][0] = XYZ[1];         /* Y */
-                luminanceImage[i][j][1] = XYZ[0] / W;     /* x */
-                luminanceImage[i][j][2] = XYZ[1] / W;     /* y */
-//                printf("li %f \n", luminanceImage[j][i][0]);
-//                printf("strt %d \n", startAddressOfPixel);
-            }
-            else
-                luminanceImage[i][j][0] = luminanceImage[i][j][1] = luminanceImage[i][j][2] = 0.;
+
+//            XYZ[0] = RGB2XYZ[0][0] * rgb[0] + RGB2XYZ[0][1] * rgb[1] + RGB2XYZ[0][2] * rgb[2];
+//            XYZ[1] = RGB2XYZ[1][0] * rgb[0] + RGB2XYZ[1][1] * rgb[1] + RGB2XYZ[1][2] * rgb[2];
+//            XYZ[2] = RGB2XYZ[2][0] * rgb[0] + RGB2XYZ[2][1] * rgb[1] + RGB2XYZ[2][2] * rgb[2];
+//            W = XYZ[0] + XYZ[1] + XYZ[2];
+//            if (W > 0.0)
+//            {   
+//                hdrImage[startAddressOfPixel] = XYZ[1];         /* Y */
+//                hdrImage[startAddressOfPixel + 1] = XYZ[0] / W;     /* x */
+//                hdrImage[startAddressOfPixel + 2] = XYZ[1] / W;     /* y */
+//
+//            }
+//            else
+//                hdrImage[startAddressOfPixel] = hdrImage[startAddressOfPixel + 1] = hdrImage[startAddressOfPixel + 2] = 0.;
+            c+=3;
         }
     }
-    
+//    FILE *f;
+//    f = fopen("/Users/atulrungta/Desktop/memorialXYZ.hdr","wb");
+//    RGBE_WriteHeader(f,width,height,&info);
+//    RGBE_WritePixels(f,hdrImage,width*height);
+//    fclose(f);    
+
 //    
 //    
 }
 
 void myGlutDisplay(	void )
-{
+{   flag = 1;
+    if(flag == 0) {
+
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
     
     glLoadIdentity(); // reset the modelview matrix to the default state
-    gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);    // place the camera where we want
+    gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, -1, 0);    // place the camera where we want
 
-//    drawScene();
-//    if(flag == 0) {
-//    if (texCapture == 1)
-//        captureSceneToTexture();
-//    
-////    ////    writeTextureToPPM("/Users/atulrungta/Desktop/textureSavedgreen", inOutTexture[1], 2048, 2048, GL_RGBA, GL_UNSIGNED_BYTE);
-//    
-//    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
-//    
-//    glLoadIdentity(); // reset the modelview matrix to the default state
-//    gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);    // place the camera where we want
-//    GLint reducedTextures, texelSize; 
-//    texSizeX = 512;
-//    texSizeY = 512;
-//    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fboId);
-//    glUseProgramObjectARB(logAverageProgram);
-//
-//    reducedTextures = glGetUniformLocationARB( logAverageProgram, "sampler0");
-//
-//    for(int i = 0;i < 4; i++) {
-//        
-//        setUpFrameBufferObj();
-//        texelSize = glGetUniformLocationARB( logAverageProgram, "TexelSize");
-//        
-////        printf("%d", reducedTextures);
-//        glDrawBuffer(GL_COLOR_ATTACHMENT1_EXT);
-//        glUniform1i(reducedTextures, 0);
-//        glActiveTexture(GL_TEXTURE0);
-////        
-//        glBindTexture( GL_TEXTURE_2D, inOutTexture[readTex] );
-//        glBegin(GL_QUADS);
-//            glNormal3f(0.0, 0.0, -1.0);
-//            glTexCoord2f(0.0,0.0); glVertex3f(-10,  0, 0);
-//            glTexCoord2f(0.0,1.0); glVertex3f(-10, 10, 0);
-//            glTexCoord2f(1.0,1.0); glVertex3f( 10, 10, 0);
-//            glTexCoord2f(1.0,0.0); glVertex3f( 10,  0, 0);
-//        glEnd();
-////        glViewport(0, 0, texSizeX, texSizeY);
-////        gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);    // place the camera where we want
-//
-//        flag = 1;
-//        printf("flag %d", flag);
-//
-//        writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved", inOutTexture[readTex], texSizeX, texSizeY, GL_RGBA, GL_UNSIGNED_BYTE);
-//
-//
-//        texSizeX /= 2;
-//        texSizeY /= 2;
-//        
-//        //ping-pong
-//        writeTex = 1 - writeTex;
-//        readTex = 1 - readTex;
-//
-//        glUniform2f(texelSize, texSizeX, texSizeY);
-//    }
-//    
-//
-//     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);  
-//    glDisable(GL_TEXTURE_2D);
-//    glUseProgramObjectARB(0);
+    glUseProgramObjectARB(logAverageProgram);
+    GLint lWLocation;
     glEnable(GL_TEXTURE_2D);
-    
+    lWLocation = glGetUniformLocationARB( logAverageProgram, "Lw");
+    glUniform1f(lWLocation, lW);
     glGenTextures(1, &lumText);
     glBindTexture(GL_TEXTURE_2D, lumText);
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, width, height, 0, GL_RGB, GL_FLOAT, hdrImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, width, height, 0, GL_RGB, GL_FLOAT, hdrImageCopy);
+    glDisable(GL_TEXTURE_2D);
     glEnable( GL_TEXTURE_2D );
+        flag = 1;
 //    glBindTexture(GL_TEXTURE_2D,lumText);
     drawScene();
 //    glDisable(GL_TEXTURE_2D);
+    glUseProgramObjectARB(0);
+        flag = 1;
+           FILE *f;
+           f = fopen("/Users/atulrungta/Desktop/cathedralMapped2.hdr","wb");
+           RGBE_WriteHeader(f,width,height,&info);
+           RGBE_WritePixels(f,hdrImage,width*height);
+           fclose(f);
+//        writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved2", lumText, width, height, GL_RGB, GL_UNSIGNED_BYTE);
 
         glFlush();
 	glutSwapBuffers();
-//    }
+    }
 }
 
 void resetTexture(GLuint texName, int textureWidth, int textureHeight, int color_red, int color_green, int color_blue, int color_alpha){
@@ -298,16 +291,18 @@ void resetTexture(GLuint texName, int textureWidth, int textureHeight, int color
 }
 // drawing elements of the scene
 void drawScene(){
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glDisable(GL_COLOR_MATERIAL);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glMatrixMode(GL_PROJECTION);
+//    glLoadIdentity();
+//    glMatrixMode(GL_MODELVIEW);
+//    glLoadIdentity();
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glBindTexture(GL_TEXTURE_2D, lumText);
-    glBegin(GL_QUADS);
 
 
     glBegin(GL_QUADS);
-    glNormal3f(0.0, 0.0, -1.0);
+    glNormal3f(0.0, 0.0, 1.0);
     glTexCoord2f(0.0,0.0); glVertex3f(-10,  0, 0);
     glTexCoord2f(0.0,1.0); glVertex3f(-10, 10, 0);
     glTexCoord2f(1.0,1.0); glVertex3f( 10, 10, 0);
@@ -317,7 +312,6 @@ void drawScene(){
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_COLOR_MATERIAL);
     
-    glPopAttrib();
 
 }
 
@@ -596,21 +590,18 @@ void myGlutKeyboard(unsigned char key, int x, int y)
 void myGlutReshape(int	x, int y)
 {
 	int tx, ty, tw, th;
-//	GLUI_Master.get_viewport_area(&tx, &ty, &tw, &th);
-//	glViewport(tx, ty, tw, th);
-//    glViewport(0, 0, 2048, 2048);    
+    //	GLUI_Master.get_viewport_area(&tx, &ty, &tw, &th);
+    //	glViewport(tx, ty, tw, th);
+    //    glViewport(0, 0, 2048, 2048);    
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glFrustum(-1, 1, -1, 1, 1, 1000);
-    
+//    gluOrtho2D(0, width, 0, height);
 	// camera transform
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
     
     
-	glutPostRedisplay();
-    
-
 	glutPostRedisplay();
 }
 
@@ -866,7 +857,7 @@ int main(int argc,	char* argv[])
 	// create the glut window
 	//
 	glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH);
-	glutInitWindowSize(512, 512);
+	glutInitWindowSize(width, height);
 	glutInitWindowPosition(100,100);
     
     
@@ -889,16 +880,26 @@ int main(int argc,	char* argv[])
     // init the interface
 	initGLUI();
     FILE *f;
-//    bool ret = HDRLoader::load("/Users/atulrungta/Desktop/toneMapping/images/image3.hdr", result); 
     f = fopen("/Users/atulrungta/Desktop/toneMapping/images/cathedral.hdr","rb");
     RGBE_ReadHeader(f,&width,&height,&info);
     hdrImage = (float *)malloc(sizeof(float)*3*width*height);
+
     RGBE_ReadPixels_RLE(f,hdrImage,width,height);
     fclose(f);
+    
+//    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/image4.hdr","rb");
+//    RGBE_ReadHeader(f,&width,&height,&info);
+//    hdrImageCopy = (float *)malloc(sizeof(float)*3*width*height);
+////    
+//    RGBE_ReadPixels_RLE(f,hdrImageCopy,width,height);
+//    fclose(f);
+    
+    
     char file[100];
     strcpy(file, "/Users/atulrungta/Desktop/toneMapping/globalOperator");
-    
-//    bindShaders(logAverageProgram, vertexShader, fragmentShader, file);
+    luminance = (float *)malloc(sizeof(float)*width*height);
+//    bool ret = HDRLoader::load("/Users/atulrungta/Desktop/toneMapping/images/cathedral.hdr", result); 
+    bindShaders(logAverageProgram, vertexShader, fragmentShader, file);
 //    setUpFrameBufferObj();
 
 	// initialize the camera
@@ -906,6 +907,7 @@ int main(int argc,	char* argv[])
 	lookat[0] = 0;	lookat[1] = 0;	lookat[2] = 0;
     calculateLogAverageLuminance();
     copyLuminance();
+//    YxyToRGB();
 //    std::string textureNames[2] = { "textures/StLouisArch512.rgb",  "textures/lightmap.rgb" };
 //    imageTex = read_texture(textureNames[0].c_str(), &width1, &height1, &components);
                    
