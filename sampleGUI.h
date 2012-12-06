@@ -12,8 +12,8 @@
 #include <jpeglib.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-
+#include "rgbe.h"
+rgbe_header_info info;
 
 //////////////////////////////////////////////////////////////////////////
 // Some constants
@@ -235,6 +235,7 @@ inline void writeTextureToPPM( const char* fileName , GLuint tex, GLuint m_iSize
     //cout << "m_iSizeX: " <<m_iSizeX << "  m_iSizeY: " << m_iSizeY << endl;
     GLuint m_iSizePerElement = sizeof(GL_UNSIGNED_BYTE);
     unsigned char*content = new unsigned char[m_iSizeX * m_iSizeY * m_iSizePerElement];
+    float *foo = new float[3 * m_iSizeX * m_iSizeY * sizeof(float)];
 //    printf("%d x", m_iSizeX); 
     glBindTexture(GL_TEXTURE_2D, tex);
     glGetTexImage(GL_TEXTURE_2D, 0, m_format, m_type, content);
@@ -243,19 +244,31 @@ inline void writeTextureToPPM( const char* fileName , GLuint tex, GLuint m_iSize
     Image img(m_iSizeX, m_iSizeY);
     // Image img(m_iSizeXX, m_iSizeYY);
     
-    
+    int c = 0;
+    float *hdrOutImage;
+    hdrOutImage = (float *)malloc(sizeof(float)*3*m_iSizeY*m_iSizeX);
+
     for(GLuint y = 0; y < m_iSizeY; y++){
         for(GLuint x = 0; x < m_iSizeX; x++){
             Color C;
             size_t index = y * m_iSizeX + x;
             double alpha = double(content[4 * index + 3]) / 255.0;
-            //alpha = 1.0;
+//            alpha = 1.0;
             C.set_r(double(content[4 * index + 0]) / 255.0 * alpha);
             C.set_g(double(content[4 * index + 1]) / 255.0 * alpha);
             C.set_b(double(content[4 * index + 2]) / 255.0 * alpha);
+            hdrOutImage[c] = double(content[4 * index + 0]) /255.0 ;
+            hdrOutImage[c+1] = double(content[4 * index + 1]) /255.0;
+            hdrOutImage[c+2] = double(content[4 * index + 2]) /255.0;
+            c+=3;
             img.set(x, y, C);
         }
     }
+          FILE *f;
+          f = fopen("/Users/atulrungta/Desktop/memorialSimpleOperator.hdr","wb");
+          RGBE_WriteHeader(f,m_iSizeX,m_iSizeY,&info);
+          RGBE_WritePixels(f,hdrOutImage,m_iSizeX*m_iSizeY);
+          fclose(f);    
 
     img.write(std::string(fileName) + ".ppm");
     

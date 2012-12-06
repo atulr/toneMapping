@@ -35,11 +35,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "sampleGUI.cpp"
-         timestampString = "376439273.139806"
+         timestampString = "376465639.785081"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "887"
-         endingLineNumber = "887"
+         startingLineNumber = "898"
+         endingLineNumber = "898"
          landmarkName = "main(int argc, char* argv[])"
          landmarkType = "7">
       </FileBreakpoint>
@@ -63,11 +63,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "sampleGUI.cpp"
-         timestampString = "376439273.139806"
+         timestampString = "376448948.293793"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "183"
-         endingLineNumber = "183">
+         startingLineNumber = "184"
+         endingLineNumber = "184">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -81,6 +81,20 @@
          startingLineNumber = "349"
          endingLineNumber = "349"
          landmarkName = "RGBE_ReadPixels_RLE(FILE *fp, float *data, int scanline_width, int num_scanlines)"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "sampleGUI.cpp"
+         timestampString = "376465639.785081"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "435"
+         endingLineNumber = "435"
+         landmarkName = "setUpFrameBufferObj()"
          landmarkType = "7">
       </FileBreakpoint>
    </FileBreakpoints>

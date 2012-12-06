@@ -1,6 +1,7 @@
 #include "sampleGUI.h"
 #include "hdrloader.h"
-#include "rgbe.h"
+//#include "rgbe.h"
+#include <jpeglib.h>
 /////////////////////////////////////////////////////////////////
 //// Main opengl stuff
 
@@ -24,7 +25,7 @@ float gammaval = 1.6;
 float *hdrImage, *hdrImageCopy;
 unsigned *imageTex;
 HDRLoaderResult result;
-rgbe_header_info info;
+
 float lW, lD;
 // where the drawing stuff should go
 static float RGB2XYZ  [3][3] = {{0.5141364, 0.3238786,  0.16036376},
@@ -80,9 +81,9 @@ void simpleOperator(float *img) {
     printf("L %f \n", lW);
     for(int i = 0; i< width * height; i++) {
         Ld = luminance[i]/(1.0 + luminance[i]);
-        hdrImage[c] = powf((hdrImage[c]/lW), 0.2) * Ld;
-        hdrImage[c+1] = powf((hdrImage[c+1]/lW), 0.2) * Ld;
-        hdrImage[c+2] = powf((hdrImage[c+2]/lW), 0.2) * Ld;
+        hdrImage[c] = powf((hdrImage[c]/lW), 0.7) * Ld;
+        hdrImage[c+1] = powf((hdrImage[c+1]/lW), 0.7) * Ld;
+        hdrImage[c+2] = powf((hdrImage[c+2]/lW), 0.7) * Ld;
         c+=3;
         
     }
@@ -171,11 +172,11 @@ void scaleImageToMidTone(float *img) {
     
     
     
-    FILE *f;
-    f = fopen("/Users/atulrungta/Desktop/memorialMidTone.hdr","wb");
-    RGBE_WriteHeader(f,width,height,&info);
-    RGBE_WritePixels(f,hdrImage,width*height);
-    fclose(f);    
+//    FILE *f;
+//    f = fopen("/Users/atulrungta/Desktop/memorialMidTone.hdr","wb");
+//    RGBE_WriteHeader(f,width,height,&info);
+//    RGBE_WritePixels(f,hdrImage,width*height);
+//    fclose(f);    
 }
 
 
@@ -224,14 +225,20 @@ void calculateLogAverageLuminance() {
 }
 
 void myGlutDisplay(	void )
-{   flag = 1;
+{   glViewport(0,0, width,height);
+//    flag = 1;
     if(flag == 0) {
+        glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+        checkGLFrameBufferError(GL_FRAMEBUFFER, "After FBO binding");
+        
+        glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
 
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
+//    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
     
     glLoadIdentity(); // reset the modelview matrix to the default state
-    gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, -1, 0);    // place the camera where we want
-
+//    gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, -1, 0);    // place the camera where we want
+        unsigned *image = new unsigned;
+        image = getImage();
     glUseProgramObjectARB(logAverageProgram);
     GLint lWLocation;
     glEnable(GL_TEXTURE_2D);
@@ -250,19 +257,38 @@ void myGlutDisplay(	void )
     glEnable( GL_TEXTURE_2D );
         flag = 1;
 //    glBindTexture(GL_TEXTURE_2D,lumText);
-    drawScene();
+//        resetTexture(lumText, width, height, 255, 255, 0, 255);
+        glMatrixMode (GL_MODELVIEW);
+        glPushMatrix ();
+        glLoadIdentity ();
+        glMatrixMode (GL_PROJECTION);
+        glPushMatrix ();
+        glLoadIdentity ();
+        
+
+        drawScene();
+
 //    glDisable(GL_TEXTURE_2D);
     glUseProgramObjectARB(0);
+        
+        glLoadIdentity(); // reset the modelview matrix to the default state
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        checkGLFrameBufferError(GL_FRAMEBUFFER, "After releasing buffer");
+
+
+//        captureSceneToTexture();
+
         flag = 1;
-           FILE *f;
-           f = fopen("/Users/atulrungta/Desktop/cathedralMapped2.hdr","wb");
-           RGBE_WriteHeader(f,width,height,&info);
-           RGBE_WritePixels(f,hdrImage,width*height);
-           fclose(f);
-//        writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved2", lumText, width, height, GL_RGB, GL_UNSIGNED_BYTE);
+        
+        glEnd ();
+        glPopMatrix ();
+        glMatrixMode (GL_MODELVIEW);
+        glPopMatrix ();
+        writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved", textureCapture, width, height, GL_RGBA, GL_UNSIGNED_BYTE);
+
 
         glFlush();
-	glutSwapBuffers();
+//	glutSwapBuffers();
     }
 }
 
@@ -299,15 +325,21 @@ void drawScene(){
     glEnable(GL_TEXTURE_2D);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
     glBindTexture(GL_TEXTURE_2D, lumText);
-
-
-    glBegin(GL_QUADS);
-    glNormal3f(0.0, 0.0, 1.0);
-    glTexCoord2f(0.0,0.0); glVertex3f(-10,  0, 0);
-    glTexCoord2f(0.0,1.0); glVertex3f(-10, 10, 0);
-    glTexCoord2f(1.0,1.0); glVertex3f( 10, 10, 0);
-    glTexCoord2f(1.0,0.0); glVertex3f( 10,  0, 0);
+          glBegin (GL_QUADS);
+          glNormal3f(0.0, 0.0, 1.0);
+          glTexCoord2f(0.0,0.0); glVertex3f(-1, -1, -1);
+          glTexCoord2f(1.0,0.0); glVertex3f(1, -1, -1);
+          glTexCoord2f(1.0,1.0); glVertex3f( 1, 1, -1);
+          glTexCoord2f(0.0,1.0); glVertex3f( -1, 1, -1);
     glEnd();
+
+//    glBegin(GL_QUADS);
+//    glNormal3f(0.0, 0.0, 1.0);
+//    glTexCoord2f(0.0,0.0); glVertex3f(-10,  0, 0);
+//    glTexCoord2f(0.0,1.0); glVertex3f(-10, 10, 0);
+//    glTexCoord2f(1.0,1.0); glVertex3f( 10, 10, 0);
+//    glTexCoord2f(1.0,0.0); glVertex3f( 10,  0, 0);
+//    glEnd();
     
     glDisable(GL_TEXTURE_2D);
     glEnable(GL_COLOR_MATERIAL);
@@ -341,27 +373,26 @@ void initGL(){
 
    
 void captureSceneToTexture(){
-//    glClearColor(1.0, 0, 0, 1);
-//    glViewport(0,0, texSizeX,texSizeY);   // set viewport to texture size
+    glViewport(0,0, width,height);   // set viewport to texture size
     
     
-//    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
     checkGLFrameBufferError(GL_FRAMEBUFFER, "After FBO binding");
     
-//    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);   // clears the screen
     
-//    glLoadIdentity(); // reset the modelview matrix to the default state
+    glLoadIdentity(); // reset the modelview matrix to the default state
 //    gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, 1, 0);    // place the camera where we want
     
     // draws the scene
-//    drawScene();
+    drawScene();
     
-//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
     checkGLFrameBufferError(GL_FRAMEBUFFER, "After releasing buffer");
     
     //should be used only for debugging; writing texture to disk is slow!!!!!!!!!!
     //put in a path you want your texture to be in
-    writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved", inOutTexture[readTex], texSizeX, texSizeY, GL_RGBA, GL_UNSIGNED_BYTE);
+    writeTextureToPPM("/Users/atulrungta/Desktop/textureSaved", textureCapture, width, height, GL_RGBA, GL_UNSIGNED_BYTE);
     
     
     texCapture = 0;     // toggle screen capture off
@@ -372,61 +403,41 @@ void captureSceneToTexture(){
 // settiug up a frambeuffer object for capture to texture
 // directly taken from: http://www.songho.ca/opengl/gl_fbo.html
 int setUpFrameBufferObj(){
-    // create the texture to capture the texture to
-    glGenTextures(2, inOutTexture);
-    unsigned* image = new unsigned;
-    int width, height, components;
-//    for (int i = 0; i < 2; i++) {
-    glEnable(GL_TEXTURE_2D);
-        image = getImage();
-        width = getWidth();
-        height = getHeight();
-        components = getComponents();
-        glBindTexture(GL_TEXTURE_2D, inOutTexture[0]);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-//        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-       
+    glGenTextures(1, &textureCapture);
+    glBindTexture(GL_TEXTURE_2D, textureCapture);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB32F_ARB, width, height, 0, GL_RGB, GL_FLOAT, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     
-        glBindTexture(GL_TEXTURE_2D, inOutTexture[1]);
-        
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        
-//    }
-//    resetTexture(inOutTexture[1], 512, 512, 0, 255, 0, 255);
+    
     // create a renderbuffer object to store depth info
-//    GLuint rboId;
-//    glGenRenderbuffers(1, &rboId);
-//    glBindRenderbuffer(GL_RENDERBUFFER, rboId);
-//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, texSizeX, texSizeY);
-//    glBindRenderbuffer(GL_RENDERBUFFER, 0);
-//    
-//    // create a framebuffer object
-//    glGenFramebuffers(1, &fboId);
-//    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
-//    
-//    // attach the texture to FBO color attachment point
-//    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, inOutTexture[readTex], 0);
-//    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, inOutTexture[writeTex], 0);
-//    
-//    // attach the renderbuffer to depth attachment point
-//    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
-//    
-//    // check FBO status
-//    GLenum status = checkGLFrameBufferError(GL_FRAMEBUFFER, "After creating buffer");
-//    if (status != GL_FRAMEBUFFER_COMPLETE)
-//        return 1;
-//    
-//    // switch back to window-system-provided framebuffer
-//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//    
+    GLuint rboId;
+    glGenRenderbuffers(1, &rboId);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboId);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    
+    // create a framebuffer object
+    glGenFramebuffers(1, &fboId);
+    glBindFramebuffer(GL_FRAMEBUFFER, fboId);
+    
+    // attach the texture to FBO color attachment point
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureCapture, 0);
+    
+    // attach the renderbuffer to depth attachment point
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboId);
+    
+    // check FBO status
+    GLenum status = checkGLFrameBufferError(GL_FRAMEBUFFER, "After creating buffer");
+    if (status != GL_FRAMEBUFFER_COMPLETE)
+        return 1;
+    
+    // switch back to window-system-provided framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
     return 0;
 }
 
@@ -887,12 +898,12 @@ int main(int argc,	char* argv[])
     RGBE_ReadPixels_RLE(f,hdrImage,width,height);
     fclose(f);
     
-//    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/image4.hdr","rb");
-//    RGBE_ReadHeader(f,&width,&height,&info);
-//    hdrImageCopy = (float *)malloc(sizeof(float)*3*width*height);
-////    
-//    RGBE_ReadPixels_RLE(f,hdrImageCopy,width,height);
-//    fclose(f);
+    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/cathedral.hdr","rb");
+    RGBE_ReadHeader(f,&width,&height,&info);
+    hdrImageCopy = (float *)malloc(sizeof(float)*3*width*height);
+//    
+    RGBE_ReadPixels_RLE(f,hdrImageCopy,width,height);
+    fclose(f);
     
     
     char file[100];
@@ -900,7 +911,7 @@ int main(int argc,	char* argv[])
     luminance = (float *)malloc(sizeof(float)*width*height);
 //    bool ret = HDRLoader::load("/Users/atulrungta/Desktop/toneMapping/images/cathedral.hdr", result); 
     bindShaders(logAverageProgram, vertexShader, fragmentShader, file);
-//    setUpFrameBufferObj();
+    setUpFrameBufferObj();
 
 	// initialize the camera
 	eye[0] = 0; 	eye[1] = 4;     eye[2] = 10;
@@ -911,7 +922,7 @@ int main(int argc,	char* argv[])
 //    std::string textureNames[2] = { "textures/StLouisArch512.rgb",  "textures/lightmap.rgb" };
 //    imageTex = read_texture(textureNames[0].c_str(), &width1, &height1, &components);
                    
-	
+    
 	// give control over to glut
 	glutMainLoop();
 
