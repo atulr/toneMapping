@@ -1,7 +1,7 @@
 #include "sampleGUI.h"
 #include "hdrloader.h"
 //#include "rgbe.h"
-#include <jpeglib.h>
+#include <fftw3.h>
 /////////////////////////////////////////////////////////////////
 //// Main opengl stuff
 
@@ -23,9 +23,11 @@ float *luminance;
 float *luminanceImage;
 float gammaval = 1.6;
 float *hdrImage, *hdrImageCopy;
+float *convolvedImage, *convolvedImageAtScale;
 unsigned *imageTex;
 HDRLoaderResult result;
-
+fftw_complex *in, *out, *out1;
+fftw_plan plan, plan1, plan2;
 float lW, lD;
 // where the drawing stuff should go
 static float RGB2XYZ  [3][3] = {{0.5141364, 0.3238786,  0.16036376},
@@ -72,6 +74,54 @@ void copyLuminance() {
 
 }
 
+void imageFFT() {
+    plan = fftw_plan_dft_r2c_2d(width, height, (double*)luminance, out, FFTW_ESTIMATE);
+    fftw_execute(plan);
+    
+    double fft_scale = 1.0/sqrt(width * height);
+    for (int i=0; i<height * width; i++) {
+        out[i][0] *= fft_scale;
+        out[i][1] *= fft_scale;
+    }
+
+}
+
+double* gaussianFFT(int scale) {
+    
+    double filter[width * height];
+    plan1 = fftw_plan_dft_r2c_2d(width, height, filter, out1, FFTW_ESTIMATE);
+    double a1 = 0.35;
+    for (int a=1; a<=scale; a++) {
+        a1 *= a1 * 1.6;
+    }
+    double key;
+    key = (a1 * scale) * (a1 * scale);
+    for (int i = 0; i<height; i++)
+        for(int j = 0; j<width; j++) {
+            filter[i * width + j] = (1.0/(3.14159 * key)) * exp( - (i * i + j*j)/key);
+        }
+    double fft_scale = 1.0/sqrt(width * height);
+    fftw_execute(plan1);
+    for (int i=0; i<height * width; i++) {
+        out1[i][0] *= fft_scale;
+        out1[i][1] *= fft_scale;
+    }
+
+}
+
+void convoleImage(int scale) {
+    fftw_complex *convolution;
+
+    convolvedImage = (float *)malloc(sizeof(float)*width*height);
+
+    convolution = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)  * width * height);
+    for (int i = 0 ; i< width * height; i++) {
+        convolution[i][0] = out[i][0] * out1[i][0] -  out[i][1] * out1[i][1];
+        convolution[i][1] = out[i][0] * out1[i][1] +  out[i][1] * out1[i][0];
+    }
+    plan2 = fftw_plan_dft_c2r_2d(width, height, convolution, (double*)convolvedImage, FFTW_ESTIMATE);
+}
+
 void simpleOperator(float *img) {
     float Ld, lMax;
     int j;
@@ -101,6 +151,17 @@ void simpleOperator(float *img) {
 //        fclose(f);    
 
         
+}
+
+float V1(int scale, int x, int y) {
+    return convolvedImageAtScale[(scale-1) * width * height + (x - 1) * width + y];
+}
+
+float activity(int scale, int x, int y) {
+    float difference, V;
+    difference = V1(scale, x, y) - V1(scale + 1, x, y);
+    V = difference/((256.0/(float)(scale * scale)) + V1(scale, x, y));
+    return V;
 }
 
 void clamp_image ()
@@ -909,6 +970,8 @@ int main(int argc,	char* argv[])
     char file[100];
     strcpy(file, "/Users/atulrungta/Desktop/toneMapping/globalOperator");
     luminance = (float *)malloc(sizeof(float)*width*height);
+    convolvedImageAtScale = (float *)malloc(sizeof(float)*width*height*8);
+
 //    bool ret = HDRLoader::load("/Users/atulrungta/Desktop/toneMapping/images/cathedral.hdr", result); 
     bindShaders(logAverageProgram, vertexShader, fragmentShader, file);
     setUpFrameBufferObj();
@@ -922,8 +985,12 @@ int main(int argc,	char* argv[])
 //    std::string textureNames[2] = { "textures/StLouisArch512.rgb",  "textures/lightmap.rgb" };
 //    imageTex = read_texture(textureNames[0].c_str(), &width1, &height1, &components);
                    
+    in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * width * height);
+    out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)  * width * height);
+    out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)  * width * height);
     
-	// give control over to glut
+    
+    	// give control over to glut
 	glutMainLoop();
 
 	return 0;

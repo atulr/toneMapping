@@ -2,6 +2,8 @@ uniform sampler2D sampler0;
 
 uniform float Lw;
 
+
+
 void main(void)
 
 {
@@ -31,9 +33,9 @@ void main(void)
     
     float Ld = Lp/(1.0 + Lp); 
     vec4 color;
-    color.r = pow((sceneColor.r/Lw), 0.5) * Ld;
-    color.g = pow((sceneColor.g/Lw), 0.5) * Ld;
-    color.b = pow((sceneColor.b/Lw), 0.5) * Ld;
+    color.r = pow((sceneColor.r/Lw), 0.4) * Ld;
+    color.g = pow((sceneColor.g/Lw), 0.4) * Ld;
+    color.b = pow((sceneColor.b/Lw), 0.4) * Ld;
 
     color.a = 1.0;
 

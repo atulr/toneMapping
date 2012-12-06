@@ -198,6 +198,7 @@
 		6EC6271C106719950003710F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = NO;
 				FRAMEWORK_SEARCH_PATHS = (
@@ -211,11 +212,14 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = "cg-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = "/usr/local/lib/**";
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
 					"-framework",
 					AppKit,
+					"-lfftw3",
 				);
 				PRODUCT_NAME = cg;
 				WRAPPER_EXTENSION = app;
@@ -226,6 +230,7 @@
 		6EC6271D106719950003710F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COMBINE_HIDPI_IMAGES = YES;
 				COPY_PHASE_STRIP = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
@@ -238,11 +243,14 @@
 				GCC_PREFIX_HEADER = "";
 				INFOPLIST_FILE = "cg-Info.plist";
 				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = "/usr/local/lib/**";
+				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
 					"-framework",
 					AppKit,
+					"-lfftw3",
 				);
 				PRODUCT_NAME = cg;
 				WRAPPER_EXTENSION = app;

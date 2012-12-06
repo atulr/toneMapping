@@ -111,7 +111,7 @@ void myGlutMouse(int button, int state, int x, int y);  // catch mouse up/down e
 void myGlutKeyboard(unsigned char key, int x, int y);   // you can put keyboard shortcuts in here
 
 void myGlutReshape(int	x, int y);                      // the window has changed shapes, fix ourselves up
-
+void imageFFT();
 
 // UI
 void initGLUI();                // init the UI code
@@ -125,7 +125,11 @@ void simpleOperator(float *img);
 float maxVal(float *img);
 void YxyToRGB();
 void clamp_image();
-
+double* gaussianFFT(int scale);
+void convoleImage(int scale);
+void reinhardOperator();
+float activity(int scale, int x, int y);
+float V1(int scale, int x, int y);
 //////////////////////////////////////////////////////////////////////////
 // Inline defined functions
 
@@ -265,7 +269,7 @@ inline void writeTextureToPPM( const char* fileName , GLuint tex, GLuint m_iSize
         }
     }
           FILE *f;
-          f = fopen("/Users/atulrungta/Desktop/memorialSimpleOperator.hdr","wb");
+          f = fopen("/Users/atulrungta/Desktop/memorialSimpleOperatorGLSL.hdr","wb");
           RGBE_WriteHeader(f,m_iSizeX,m_iSizeY,&info);
           RGBE_WritePixels(f,hdrOutImage,m_iSizeX*m_iSizeY);
           fclose(f);    
