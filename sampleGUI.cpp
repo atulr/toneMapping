@@ -23,10 +23,10 @@ float *luminance;
 float *luminanceImage;
 float gammaval = 1.6;
 float *hdrImage, *hdrImageCopy;
-float *convolvedImage, *convolvedImageAtScale;
+float *convolvedImage, convolvedImageAtScale[8][767][1023]; //remember to change width and height
 unsigned *imageTex;
 HDRLoaderResult result;
-fftw_complex *in, *out, *out1;
+fftw_complex *out, *out1;
 fftw_plan plan, plan1, plan2;
 float lW, lD;
 // where the drawing stuff should go
@@ -55,8 +55,8 @@ float get_maxvalue ()
 {
     float max = 0.;
     
-    for (int i = 0; i < width * height * 3; i++)
-        max = (max < hdrImage[i]) ? hdrImage[i] : max;
+    for (int i = 0; i < width * height; i++)
+        max = (max < luminance[i]) ? luminance[i] : max;
     return max;
 }
 
@@ -71,6 +71,7 @@ void copyLuminance() {
 //        }
     scaleImageToMidTone(luminance);
     simpleOperator(luminance);
+//    reinhardOperator();
 
 }
 
@@ -86,9 +87,10 @@ void imageFFT() {
 
 }
 
-double* gaussianFFT(int scale) {
+void gaussianFFT(int scale) {
     
-    double filter[width * height];
+    double *filter;
+    filter = (double *)malloc(sizeof(double)*width*height);
     plan1 = fftw_plan_dft_r2c_2d(width, height, filter, out1, FFTW_ESTIMATE);
     double a1 = 0.35;
     for (int a=1; a<=scale; a++) {
@@ -120,6 +122,47 @@ void convoleImage(int scale) {
         convolution[i][1] = out[i][0] * out1[i][1] +  out[i][1] * out1[i][0];
     }
     plan2 = fftw_plan_dft_c2r_2d(width, height, convolution, (double*)convolvedImage, FFTW_ESTIMATE);
+    fftw_execute(plan2);
+}
+
+void assignImage(int scale) {
+    for (int i=0;i<height; i++)
+        for(int j=0;j<width; j++) {
+            convolvedImageAtScale[scale-1][j][i] = convolvedImage[i * width + j];
+        }
+}
+
+void reinhardOperator() {
+    int scaleToUse = 1;
+    float gaussianLum, Ld;
+    int c = 0, size = 0;
+    for(int i = 0;i<height; i++)
+        for(int j=0;j<width;j++) {
+            for(int k = 1; k<=8; k++) {
+                gaussianFFT(k);
+                convoleImage(k);
+                assignImage(k);
+                if(fabs(activity(k, i, j)) > 0.05f) {
+                    scaleToUse = k;
+                    break;
+                }
+            }
+            gaussianLum = V1(scaleToUse, i, j); 
+            Ld = luminance[size]/(1.0 + gaussianLum);
+            hdrImage[c] = powf((hdrImage[c]/lW), 0.7) * Ld;
+            hdrImage[c+1] = powf((hdrImage[c+1]/lW), 0.7) * Ld;
+            hdrImage[c+2] = powf((hdrImage[c+2]/lW), 0.7) * Ld;
+           
+            c+=3;size++;
+        }
+    clamp_image();
+           FILE *f;
+           f = fopen("/Users/atulrungta/Desktop/memorialReinhardOperator.hdr","wb");
+           RGBE_WriteHeader(f,width,height,&info);
+           RGBE_WritePixels(f,hdrImage,width*height);
+           fclose(f);    
+
+
 }
 
 void simpleOperator(float *img) {
@@ -154,7 +197,7 @@ void simpleOperator(float *img) {
 }
 
 float V1(int scale, int x, int y) {
-    return convolvedImageAtScale[(scale-1) * width * height + (x - 1) * width + y];
+    return convolvedImageAtScale[scale][x][y];
 }
 
 float activity(int scale, int x, int y) {
@@ -298,14 +341,14 @@ void myGlutDisplay(	void )
     
     glLoadIdentity(); // reset the modelview matrix to the default state
 //    gluLookAt(eye[0], eye[1], eye[2], lookat[0], lookat[1], lookat[2], 0, -1, 0);    // place the camera where we want
-        unsigned *image = new unsigned;
-        image = getImage();
     glUseProgramObjectARB(logAverageProgram);
-    GLint lWLocation;
+    GLint lWLocation, lMaxLocation;
     glEnable(GL_TEXTURE_2D);
     lWLocation = glGetUniformLocationARB( logAverageProgram, "Lw");
+    lMaxLocation = glGetUniformLocationARB( logAverageProgram, "lMax");
     glUniform1f(lWLocation, lW);
-    glGenTextures(1, &lumText);
+    glUniform1f(lMaxLocation, get_maxvalue());
+        glGenTextures(1, &lumText);
     glBindTexture(GL_TEXTURE_2D, lumText);
 //    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 //        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -952,14 +995,14 @@ int main(int argc,	char* argv[])
     // init the interface
 	initGLUI();
     FILE *f;
-    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/cathedral.hdr","rb");
+    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/image4.hdr","rb");
     RGBE_ReadHeader(f,&width,&height,&info);
     hdrImage = (float *)malloc(sizeof(float)*3*width*height);
 
     RGBE_ReadPixels_RLE(f,hdrImage,width,height);
     fclose(f);
     
-    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/cathedral.hdr","rb");
+    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/image4.hdr","rb");
     RGBE_ReadHeader(f,&width,&height,&info);
     hdrImageCopy = (float *)malloc(sizeof(float)*3*width*height);
 //    
@@ -970,7 +1013,7 @@ int main(int argc,	char* argv[])
     char file[100];
     strcpy(file, "/Users/atulrungta/Desktop/toneMapping/globalOperator");
     luminance = (float *)malloc(sizeof(float)*width*height);
-    convolvedImageAtScale = (float *)malloc(sizeof(float)*width*height*8);
+//    convolvedImageAtScale = (float *)malloc(sizeof(float)*width*height*8);
 
 //    bool ret = HDRLoader::load("/Users/atulrungta/Desktop/toneMapping/images/cathedral.hdr", result); 
     bindShaders(logAverageProgram, vertexShader, fragmentShader, file);
@@ -979,16 +1022,23 @@ int main(int argc,	char* argv[])
 	// initialize the camera
 	eye[0] = 0; 	eye[1] = 4;     eye[2] = 10;
 	lookat[0] = 0;	lookat[1] = 0;	lookat[2] = 0;
+    
+    out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)  * width * height);
+    out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)  * width * height);
+
+
     calculateLogAverageLuminance();
     copyLuminance();
+//    imageFFT();
+
 //    YxyToRGB();
 //    std::string textureNames[2] = { "textures/StLouisArch512.rgb",  "textures/lightmap.rgb" };
 //    imageTex = read_texture(textureNames[0].c_str(), &width1, &height1, &components);
                    
-    in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * width * height);
-    out = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)  * width * height);
-    out1 = (fftw_complex*) fftw_malloc(sizeof(fftw_complex)  * width * height);
-    
+//    in = (fftw_complex*) fftw_malloc(sizeof(fftw_complex) * width * height);
+    fftw_destroy_plan(plan);   
+    fftw_destroy_plan(plan1);   
+    fftw_destroy_plan(plan2);   
     
     	// give control over to glut
 	glutMainLoop();

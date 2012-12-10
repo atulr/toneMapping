@@ -1,0 +1,104 @@
+<html><head>
+<title>Final Project</title>
+
+<meta http-equiv="Content-Type" content="text/html;
+charset=iso-8859-1">
+</head>
+
+<body>
+<h1>Interactive Time-Dependent Tone Mapping Using Programmable Graphics Hardware by Goodnight et al</h1>
+<h3>By: Atul Rungta</h3>
+<h4>Tone Mapping</h4>
+	<p>Dynamic range is defined as the range of light intensities present in a scene. In the real world, very large dynamic ranges are common place, sometimes exceeding tens of orders of magnitude. Displaying such images on the computer screen presents a challenge since most output displays have a relatively small displayable dynamic range. This disparity gives rise to the field of tone mapping, which aims at optimizing the mapping from an image with a large dynamic range to a display of small dynamic range. </p>
+<h4> Algorithm</h4>
+<p> The paper I was working on uses the tone mapping operator from Photographic Tone Reproduction for Digital Images by Reinhard et al.</p>
+<h4> Steps:</h4>
+<p> 1. Initial Luminance Mapping: The world luminance of each pixel is calculated given by :<p>
+<p>
+<img src="eq1.png">
+<p>
+<p> 2. The scene is then mapped to the middle-gray of the displayed image, as given by: </p>
+<p>
+<img src="eq2.png">
+<p>
+<p> where a is chosen to be a=0.18 </p>
+<p> 3. Then, a tone mapping operator is applied :<p>
+<p>
+<img src="eq3.png">
+<img src="eq4.png">
+</p>	
+<p>4. Automatic Dodging and burning: In traditional dodging and burning, all portions of the print potentially receive a different exposure time, bring "up" selected dark regions or bringing "down" selected regions to avoid loss of detail. To achieve this automatically, the authors suggest convoluting the image with a center-surround function which is constructed using circularly symmetric Gaussian profiles of the form: </p>
+<p>
+<img src="eq5.png">
+<p>
+<p>These profiles operate at different scales and at different image positions (x,y). The image is then convolved as :</p>
+<p>
+<img src="eq6.png">
+</p>
+<p>The center-surround function used is defined by:</p>
+<p>
+<img src="eq7.png">
+</p>
+<p>where center V1 and surrounding V2 responses are derived from the above 2 equations. The equation is calculated to measure the locality of the pixel which amounts to finding a scale s of appropriate size. To consider the largest neighborhood where around a pixel with fairly even luminances, V is thresholded to select a corresponding scale sm where:</p>
+<p>
+<img src="eq8.png">
+</p>
+<p>where epsilon is the threshold and was chosen to be 0.05</p>
+<p>5. Finally, the global tone operator is computed as follows:</p>
+<p>
+<img src="eq9.png">
+</p>
+<p>This functions constitutes the local dodging and burning. The luminance of a dark pixel in a relatively bright region will get decreased, thereby enhancing the contrast at the pixel. Similarly, a pixel in a relatively dark region will be compressed less.</p>
+
+<h4>Implementation</h4>
+<p> 1.I use radiance .hdr format for the input files</p>
+<p>	2. The log-average luminance of the scene is calculated as per the equation</p>
+<p>	3. In my fragment shader this value is passed. </p>
+<p>	4. Each color value of the floating texture is then converted to luminance using L = 0.27R + 0.67G + 0.06B</p>
+<p>	5. I tried to use the dodging-and-burning version (still working on it) on the GPU but ran out of time to do so. Instead I used the operator as in equation 4</p>
+<p> 6. The pixel values are calculated from the luminance values as per the given equation and rendered to a texture.</p>
+<p>
+<img src="eq10.png">
+</p>
+<p> a controls the saturation and has values between 0.4~0.8</p>
+<p> 7. The values are converted back to .hdr and displayed</p>
+
+
+<h4>Some Results</h4>
+<h5>HDR Image 1</h5>
+<p>
+<img src="cathedral.png">
+</p>
+
+<h5>Tone Mapped </h5>
+<p>
+<img src='cathedralTM.png'>	
+</p>
+
+<h5>HDR Image 2</h5>
+<p>
+	<img src='desk.png'>
+</p>
+<h5>Tone Mapped </h5>
+<p>
+<img src='deskTM.png'>	
+</p>
+<h5>HDR Image 3</h5>
+<p>
+	<img src='memorial.png'>
+</p>
+<h5>Tone Mapped </h5>
+<p>
+<img src='memorialTM.png'>	
+</p>
+
+
+<<h4>Conclusion and future work</h4>
+<p> My tone mapping operator code seems to work but degrades the colors present in the scene. I tried tweaking the parameters according to the image to get the best possible output. I guess, the degradation is because of the simplicity of the operator used instead of the dodge-and-burn technique.
+I found the implementation of the algorithm difficult on the GPU. The paper mentions ways to calculate the center-surround functions on the GPU, but I found it difficult to implement it that way on the GPU. Instead, I tried doing it my way but ran out of time. I also tried the same on the CPU using FFT to make computations faster, but that didn't work either. Given more time, I would certainly implement the algorithm in its entirety. </p>
+
+
+<h4>References</h4>
+<p>1. Photographic Tone Reproduction for Digital Images - Reinhard et al</p>
+<p>2. Interactive Time-Dependent Tone Mapping Using Programmable Graphics Hardware - Goodnight et al</p>
+</body></html>

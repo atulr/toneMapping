@@ -125,11 +125,12 @@ void simpleOperator(float *img);
 float maxVal(float *img);
 void YxyToRGB();
 void clamp_image();
-double* gaussianFFT(int scale);
+void gaussianFFT(int scale);
 void convoleImage(int scale);
 void reinhardOperator();
 float activity(int scale, int x, int y);
 float V1(int scale, int x, int y);
+void assignImage(int k);
 //////////////////////////////////////////////////////////////////////////
 // Inline defined functions
 

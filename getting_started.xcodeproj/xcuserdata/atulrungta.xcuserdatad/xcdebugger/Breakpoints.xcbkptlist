@@ -35,11 +35,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "sampleGUI.cpp"
-         timestampString = "376498322.29989"
+         timestampString = "376508047.205058"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "942"
-         endingLineNumber = "942"
+         startingLineNumber = "1002"
+         endingLineNumber = "1002"
          landmarkName = "main(int argc, char* argv[])"
          landmarkType = "7">
       </FileBreakpoint>
@@ -63,11 +63,11 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "sampleGUI.cpp"
-         timestampString = "376498322.29989"
+         timestampString = "376508047.205058"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "228"
-         endingLineNumber = "228">
+         startingLineNumber = "288"
+         endingLineNumber = "288">
       </FileBreakpoint>
       <FileBreakpoint
          shouldBeEnabled = "No"
@@ -89,12 +89,26 @@
          continueAfterRunningActions = "No"
          isPathRelative = "1"
          filePath = "sampleGUI.cpp"
-         timestampString = "376498322.29989"
+         timestampString = "376508047.205058"
          startingColumnNumber = "9223372036854775807"
          endingColumnNumber = "9223372036854775807"
-         startingLineNumber = "479"
-         endingLineNumber = "479"
+         startingLineNumber = "539"
+         endingLineNumber = "539"
          landmarkName = "setUpFrameBufferObj()"
+         landmarkType = "7">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "No"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "1"
+         filePath = "sampleGUI.cpp"
+         timestampString = "376507503.007422"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "79"
+         endingLineNumber = "79"
+         landmarkName = "imageFFT()"
          landmarkType = "7">
       </FileBreakpoint>
    </FileBreakpoints>
