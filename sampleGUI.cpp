@@ -18,7 +18,7 @@ int CurrActiveBuffer = 0;
 int readTex = CurrActiveBuffer;
 int writeTex = 1-CurrActiveBuffer;
 int flag = 0;
-int width = 767, height= 1023, width1, height1, components;
+int width = 644, height= 874, width1, height1, components;
 float *luminance;
 float *luminanceImage;
 float gammaval = 1.6;
@@ -995,14 +995,14 @@ int main(int argc,	char* argv[])
     // init the interface
 	initGLUI();
     FILE *f;
-    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/image4.hdr","rb");
+    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/desk.hdr","rb");
     RGBE_ReadHeader(f,&width,&height,&info);
     hdrImage = (float *)malloc(sizeof(float)*3*width*height);
 
     RGBE_ReadPixels_RLE(f,hdrImage,width,height);
     fclose(f);
     
-    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/image4.hdr","rb");
+    f = fopen("/Users/atulrungta/Desktop/toneMapping/images/desk.hdr","rb");
     RGBE_ReadHeader(f,&width,&height,&info);
     hdrImageCopy = (float *)malloc(sizeof(float)*3*width*height);
 //    

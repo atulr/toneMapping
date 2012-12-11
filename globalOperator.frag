@@ -6,20 +6,8 @@ uniform sampler2D sampler0;
 uniform float Lw;
 uniform float lMax;
 
-//const vec2 offset[9]; 
-
-//void luminance(in vec3 color) {
-//    
-//}
-//void convolution(in mat3 R) {
-//    
-//}
-//
-//void V1(in int scale) {
-//    
-//}
-float width = 767.0;
-float height = 1023.0;
+float width = 644.0;
+float height = 874.0;
 
 void convolution(in mat3 R, out float sum) {
     float step_w = 1.0/width;
@@ -213,28 +201,25 @@ void main(void)
 {
     vec4 sceneColor = texture2D(sampler0, gl_TexCoord[0].st);
       
-//    const mat3 RGB2XYZ = mat3(0.5141364, 0.3238786,  0.16036376,
-//        0.265068,  0.67023428, 0.06409157,
-//        0.0241188, 0.1228178,  0.84442666);				                    
-//    vec3 XYZ = RGB2XYZ * sceneColor.rgb;
-//    
-//    vec3 Yxy;
-//    Yxy.r = XYZ.g;                            // copy luminance Y
-//    Yxy.g = XYZ.r / (XYZ.r + XYZ.g + XYZ.b ); // x = X / (X + Y + Z)
-//    Yxy.b = XYZ.g / (XYZ.r + XYZ.g + XYZ.b ); // y = Y / (X + Y + Z)
+    const mat3 RGB2XYZ = mat3(0.5141364, 0.3238786,  0.16036376,
+        0.265068,  0.67023428, 0.06409157,
+        0.0241188, 0.1228178,  0.84442666);				                    
+    vec3 XYZ = RGB2XYZ * sceneColor.rgb;
+////    
+    vec3 Yxy;
+    Yxy.r = XYZ.g;                            // copy luminance Y
+    Yxy.g = XYZ.r / (XYZ.r + XYZ.g + XYZ.b ); // x = X / (X + Y + Z)
+    Yxy.b = XYZ.g / (XYZ.r + XYZ.g + XYZ.b ); // y = Y / (X + Y + Z)
     float x = gl_TexCoord[0].x;
     float y = gl_TexCoord[0].y;
-    float lum = 0.27 * sceneColor.r + 0.67 * sceneColor.g + .06 * sceneColor.b;
-    float threshold = 0.05;
+    float lum = Yxy.r;
+    float threshold = 0.01;
     float Lp = lum * 0.18 / Lw;  
     
-//    XYZ.r = Yxy.r * Yxy.g / Yxy. b;               // X = Y * x / y
-//    XYZ.g = Yxy.r;                                // copy luminance Y
-//    XYZ.b = Yxy.r * (1.0 - Yxy.g - Yxy.b) / Yxy.b;  // Z = Y * (1-x-y) / y
 //    
-//    const mat3 XYZ2RGB  = mat3( 2.5651,-1.1665,-0.3986,
-//        -1.0217, 1.9777, 0.0439, 
-//        0.0753, -0.2543, 1.1892);
+    const mat3 XYZ2RGB  = mat3( 2.5651,-1.1665,-0.3986,
+        -1.0217, 1.9777, 0.0439, 
+        0.0753, -0.2543, 1.1892);
     int i;
     float val, s;
     mat3 M;
@@ -286,14 +271,43 @@ void main(void)
     
 //    float Ld = (Lp * (1.0 + Lp/(lMax * lMax)))/(1.0 + Lp); 
     float Ld = Lp/ ( 1.0 + s);
-    vec4 color;
-    color.r = pow((sceneColor.r/Lw), 0.5) * Ld;
-    color.g = pow((sceneColor.g/Lw), 0.5) * Ld;
-    color.b = pow((sceneColor.b/Lw), 0.5) * Ld;
+
+//    vec4 color;
+     
+    float X, Y, Z;
+    vec3 result;
+
+    Y = Ld;
+    result[1] = Yxy.g;
+    result[2] = Yxy.b;
+    if ((Y > 0.0) && (result[1] > 0.0) && (result[2] > 0.0))
+    {
+        X = (result[1] * Y) / result[2];
+        Z = (X/result[1]) - X - Y;
+    }
+    else
+        X = Z = 0.;
+    Yxy.r = X;
+    Yxy.g = Y;
+    Yxy.b = Z;
     
+    result[0] = result[1] = result[2] = 0.0;
+    
+    result = XYZ2RGB * Yxy;
+    
+    
+//    XYZ.r = Yxy.r * Yxy.g / Yxy. b;               // X = Y * x / y
+//    XYZ.g = Ld;                                // copy luminance Y
+//    XYZ.b = Yxy.r * (1.0 - Yxy.g - Yxy.b) / Yxy.b;  // Z = Y * (1-x-y) / y
 
-
-    gl_FragData[0] = color;
+    vec3 color = XYZ2RGB * XYZ;
+    vec4 fooColor;
+//    float gamma = 1.6;
+    fooColor.r = result.r;
+    fooColor.g = result.g;
+    fooColor.b = result.b;
+    
+    gl_FragData[0] = vec4(fooColor.r, fooColor.g, fooColor.b, 1.0);
 //    gl_FragData[0] = vec4(0, 1.0, 0,1.0);
 
 }
